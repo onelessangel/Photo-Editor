@@ -9,7 +9,7 @@ I created a text editor that supports performing a set of operations over PPM (p
 |        TYPE        |        ASCII        |        BINARY       |               COLORS                |
 | ------------------ | ------------------- | ------------------- | ----------------------------------- |
 |      GRAYSCALE     |         P2          |         P5          |    0 - 255 (black & white shade)    |
-|      RGB           |         P3          |         P6          |            16.777.216 (RGB)         |
+|      RGB           |         P3          |         P6          |      &nbsp &nbsp &nbsp   &nbsp &nbsp   16.777.216 (RGB)         |
 
 
 # RUN EXAMPLE: 
