@@ -13,13 +13,13 @@ I created a text editor that supports performing a set of operations over PPM (p
 
 
 # RUN EXAMPLE: 
-"I:" represents keyboard typed command and "O:" represents output message.<br>
+"I:" represents keyboard typed command and "O:" represents output message.<br><br>
 I:LOAD test_file  <br/>
 O;Loaded test_file <br/>
 I:SELECT 0 1 8 10 <br/>
 O;Selected 0 1 8 10 <br/>
 I:CROP<br/>
-/O;Image cropped<br/>
+O;Image cropped<br/>
 I:SAVE my_binary_file<br/>
 O;Saved my_binary_file<br/>
 I:LOAD non_existent_file<br/>
