@@ -19,3 +19,4 @@ char* user_input(void) {
 
     return input;
 }
+

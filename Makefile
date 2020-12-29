@@ -1,15 +1,14 @@
 # Chelcea Claudiu Marian
-# WARNING! To work correctly, keep the Makefile separate from the folder of the source code, since the Makefile looks for that specific folder.
 
 # compiler setup
 CC=gcc
 CFLAGS=-Wall -Wextra
-OBJ=./FILES/main.o ./FILES/Support.o ./FILES/Memory.o
+OBJ=main.o Support.o Memory.o
 NAME=app
 
 
 # define targets
-TARGETS=main Support Memory link
+TARGETS=main Support Memory link_objects
 
 
 # execute
@@ -17,17 +16,18 @@ build: 	$(TARGETS)
 
 
 # create binary files
-main: ./FILES/main.c
-	$(CC) $(CFLAGS) -c ./FILES/main.c
+main: main.c
+	$(CC) $(CFLAGS) -c main.c
 
-Support: ./FILES/Support.c
-	$(CC) $(CFLAGS) -c ./FILES/Support.c
+Support: Support.c
+	$(CC) $(CFLAGS) -c Support.c
 
-Memory: ./FILES/Memory.c
-	$(CC) $(CFLAGS) -c ./FILES/Memory.c
+Memory: Memory.c
+	$(CC) $(CFLAGS) -c Memory.c
+
 
 # link the files, create executable
-link: ./FILES/main.o ./FILES/Support.o ./FILES/Memory.o
+link_objects: main.o Support.o Memory.o
 	gcc -o $(NAME) $(OBJ) $(CFLAGS)
 	rm $(OBJ)
 
@@ -36,3 +36,4 @@ clean:
 	rm -f $(TARGETS)
 
 .PHONY: clean
+
