@@ -13,25 +13,25 @@ I created a text editor that supports performing a set of operations over PPM (p
 
 
 # RUN EXAMPLE: 
--- where "<" represents keyboard typed command and ">" represents output message.
+"<" represents keyboard typed command and "O:" represents output message.
 <LOAD test_file  <br/>
-/>Loaded test_file <br/>
+O;Loaded test_file <br/>
 <SELECT 0 1 8 10 <br/>
-/>Selected 0 1 8 10 <br/>
+O;Selected 0 1 8 10 <br/>
 <CROP<br/>
-/>Image cropped<br/>
+/O;Image cropped<br/>
 <SAVE my_binary_file<br/>
-/>Saved my_binary_file<br/>
+O;Saved my_binary_file<br/>
 <LOAD non_existent_file<br/>
-/>Failed to load non_existent_file<br/>
+O;Failed to load non_existent_file<br/>
 <LOAD color_file<br/>
-/>Loaded color_file<br/>
+O;Loaded color_file<br/>
 <GRAYSCALE<br/>
-/>Grayscale filter applied<br/>
+O;Grayscale filter applied<br/>
 <SEPIA<br/>
-/>Sepia filter not available<br/>
+O;Sepia filter not available<br/>
 <SAVE my_plain_file ascii<br/>
-/>Saved my_plain_file<br/>
+O;Saved my_plain_file<br/>
 <EXIT<br/>
 
 # GENERATE YOUR OWN IMAGE:
