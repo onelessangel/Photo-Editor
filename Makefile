@@ -1,4 +1,5 @@
 # Chelcea Claudiu Marian
+# WARNING! To work correctly, keep the Makefile separate from the folder of the source code, since the Makefile looks for that specific folder.
 
 # compiler setup
 CC=gcc
@@ -27,7 +28,7 @@ Memory: ./FILES/Memory.c
 
 # link the files, create executable
 link: ./FILES/main.o ./FILES/Support.o ./FILES/Memory.o
-	gcc -o $(NAME) $(OBJ)
+	gcc -o $(NAME) $(OBJ) $(CFLAGS)
 	rm $(OBJ)
 
 # remove executables
