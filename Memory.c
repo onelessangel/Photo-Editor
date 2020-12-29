@@ -2,7 +2,6 @@
 
 #include <stdlib.h>
 #define MAX_COMMAND_SIZE 10
-#define particular_case "SELECT"
 
 // Exit status
 enum {
@@ -16,7 +15,7 @@ char* user_input(void) {
 
     if(input==NULL)
         return (char* ) MALLOC_FAIL;
-
+    
     return input;
 }
 
