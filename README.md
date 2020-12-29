@@ -6,13 +6,14 @@ Contact at: claudiuchelcea01@gmail.com
 
 I created a text editor that supports performing a set of operations over PPM (portable pixmap format) and PGM (portable graymap format) image file formats, both as plain (ASCII) text or binary files.
 
-|      TYPE      |      ASCII      |      BINARY     |             COLORS              |
-|  ------------- |   -----------   | --------------- | ------------------------------- |
-|    GRAYSCALE   |       P2        |       P5        |  0 - 255 (black & white shade)  |
-|    RGB         |       P3        |       P6        |          16.777.216 (RGB)       |
+        |      TYPE      |      ASCII      |      BINARY     |             COLORS              |
+        |  ------------- |   -----------   | --------------- | ------------------------------- |
+        |    GRAYSCALE   |       P2        |       P5        |  0 - 255 (black & white shade)  |
+        |    RGB         |       P3        |       P6        |          16.777.216 (RGB)       |
 
 
-# RUN EXAMPLE: -- where "<" represents keyboard typed command and ">" represents output message.
+# RUN EXAMPLE: 
+-- where "<" represents keyboard typed command and ">" represents output message.
 <LOAD test_file
 >Loaded test_file
 <SELECT 0 1 8 10
