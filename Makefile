@@ -3,7 +3,7 @@
 # compiler setup
 CC=gcc
 CFLAGS=-Wall -Wextra
-OBJ=main.o Support.o Memory.o
+OBJ=./FILES/main.o ./FILES/Support.o ./FILES/Memory.o
 NAME=app
 
 
@@ -16,17 +16,17 @@ build: 	$(TARGETS)
 
 
 # create binary files
-main: main.c
-	$(CC) $(CFLAGS) -c main.c
+main: ./FILES/main.c
+	$(CC) $(CFLAGS) -c ./FILES/main.c
 
-Support: Support.c
-	$(CC) $(CFLAGS) -c Support.c
+Support: ./FILES/Support.c
+	$(CC) $(CFLAGS) -c ./FILES/Support.c
 
-Memory: Memory.c
-	$(CC) $(CFLAGS) -c Memory.c
+Memory: ./FILES/Memory.c
+	$(CC) $(CFLAGS) -c ./FILES/Memory.c
 
 # link the files, create executable
-link: main.o Support.o Memory.o
+link: ./FILES/main.o ./FILES/Support.o ./FILES/Memory.o
 	gcc -o $(NAME) $(OBJ)
 	rm $(OBJ)
 
