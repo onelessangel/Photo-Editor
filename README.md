@@ -14,32 +14,32 @@ I created a text editor that supports performing a set of operations over PPM (p
 
 # RUN EXAMPLE: 
 -- where "<" represents keyboard typed command and ">" represents output message.
-<LOAD test_file
->Loaded test_file
-<SELECT 0 1 8 10
->Selected 0 1 8 10
-<CROP
->Image cropped
-<SAVE my_binary_file
->Saved my_binary_file
-<LOAD non_existent_file
->Failed to load non_existent_file
-<LOAD color_file
->Loaded color_file
-<GRAYSCALE
->Grayscale filter applied
-<SEPIA
->Sepia filter not available
-<SAVE my_plain_file ascii
->Saved my_plain_file
-<EXIT
+<LOAD test_file  <br/>
+>Loaded test_file <br/>
+<SELECT 0 1 8 10 <br/>
+>Selected 0 1 8 10 <br/>
+<CROP<br/>
+>Image cropped<br/>
+<SAVE my_binary_file<br/>
+>Saved my_binary_file<br/>
+<LOAD non_existent_file<br/>
+>Failed to load non_existent_file<br/>
+<LOAD color_file<br/>
+>Loaded color_file<br/>
+<GRAYSCALE<br/>
+>Grayscale filter applied<br/>
+<SEPIA<br/>
+>Sepia filter not available<br/>
+<SAVE my_plain_file ascii<br/>
+>Saved my_plain_file<br/>
+<EXIT<br/>
 
 # GENERATE YOUR OWN IMAGE:
-To generate your own PNM and PGM files, use the "convert" utility that converts png / jpeg / jpg files to these formats:
-• Setup: sudo apt install imagemagick
-• Documentation: man convert
-• Examples:
-    convert foo.jpg foo.ppm (transforms foo.jpg în foo.ppm, binary format)
-    convert foo.jpg foo.pgm (transforms foo.jpg în foo.pgm, grayscale format)
-    convert foo.jpg -compress None foo.ppm (transforms foo.jpg în foo.ppm, plain (ASCII) text format)
-    convert foo.jpg -compress None foo.pgm
+To generate your own PNM and PGM files, use the "convert" utility that converts png / jpeg / jpg files to these formats:<br/>
+• Setup: sudo apt install imagemagick<br/>
+• Documentation: man convert<br/>
+• Examples:<br/>
+    convert foo.jpg foo.ppm (transforms foo.jpg în foo.ppm, binary format)<br/>
+    convert foo.jpg foo.pgm (transforms foo.jpg în foo.pgm, grayscale format)<br/>
+    convert foo.jpg -compress None foo.ppm (transforms foo.jpg în foo.ppm, plain (ASCII) text format)<br/>
+    convert foo.jpg -compress None foo.pgm<br/>
