@@ -13,7 +13,7 @@ I created a text editor that supports performing a set of operations over PPM (p
 
 
 # RUN EXAMPLE: 
-"<" represents keyboard typed command and "O:" represents output message.
+"<" represents keyboard typed command and "O:" represents output message.<br>
 <LOAD test_file  <br/>
 O;Loaded test_file <br/>
 <SELECT 0 1 8 10 <br/>
