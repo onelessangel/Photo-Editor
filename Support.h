@@ -1,3 +1,5 @@
+// Chelcea Claudiu Marian
+
 #ifndef __SUPPORT_H_
 #define __SUPPORT_H_
 
@@ -17,7 +19,7 @@ void ROTATE(const int);
 void CROP(void);
 
 // This function will turn the image to grayscale format.
-void GREYSCALE(void);
+void GRAYSCALE(void);
 
 // This function will turn the image to sepia format.
 void SEPIA(void);
@@ -28,10 +30,19 @@ void SAVE(void);
 // This function closes the program.
 void EXIT(void);
 
+// This function returns a value between 0 - 8 representing
+// the position in the command list of the received input
+// and returns -1 if it doesn't exist
+int find_command_value(const char**, const char* );
+
+// This functions checks if an valid command has been received
+// and,if true, executes the corresponding function
+void check_command(const int);
+
+// Exit status
 enum {
     SUCCESS=0,
     ERROR=1,
-    MALLOC_FAIL=2
 };
 
 #endif

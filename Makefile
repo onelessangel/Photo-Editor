@@ -3,12 +3,12 @@
 # compiler setup
 CC=gcc
 CFLAGS=-Wall -Wextra
-OBJ=main.o Support.o
+OBJ=main.o Support.o Memory.o
 NAME=app
 
 
 # define targets
-TARGETS=main Support link
+TARGETS=main Support Memory link
 
 
 # execute
@@ -22,9 +22,11 @@ main: main.c
 Support: Support.c
 	$(CC) $(CFLAGS) -c Support.c
 
+Memory: Memory.c
+	$(CC) $(CFLAGS) -c Memory.c
 
 # link the files, create executable
-link: main.o Support.o
+link: main.o Support.o Memory.o
 	gcc -o $(NAME) $(OBJ)
 	rm $(OBJ)
 
