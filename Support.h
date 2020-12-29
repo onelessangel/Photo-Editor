@@ -30,10 +30,10 @@ void SAVE(void);
 // This function closes the program.
 void EXIT(void);
 
-// This function returns a value between 0 - 8 representing
+// This function returns a value between 0 - 7 representing
 // the position in the command list of the received input
 // and returns -1 if it doesn't exist
-int find_command_value(const char**, const char* );
+int find_command_value(const char**, const char*);
 
 // This functions checks if an valid command has been received
 // and,if true, executes the corresponding function
