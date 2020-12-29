@@ -20,12 +20,12 @@ void SELECT_ALL(void){
 }
 
 // This function rotates the image by a certain angle.
-void ROTATE(const int angle){
+void ROTATE(const int angle) {
     printf("ROTATE by %d\n",angle);
 }
 
 // This function crops the image.
-void CROP(void){
+void CROP(void) {
     printf("CROP\n");
 }
 
@@ -60,50 +60,67 @@ int find_command_value(const char *commands[], char* input)
             command_value=i;
             break;
         }
+    if(strcmp("ALL",input)==0) 
+        command_value=2;
     return command_value;
 }
-
+  
 // This functions checks if an valid command has been received
 // and,if true, executes the corresponding function
 void check_command(int command_value)
 {
+    int coord_x1, coord_y1, coord_x2, coord_y2;
+
     switch(command_value) {
+        
+        // LOAD
         case 0:
             LOAD("text");
                 break;
-        
+
+        // SELECT
         case 1:
-                SELECT(1,1,1,1);
-                break;
-            
+                if((scanf("%d %d %d %d",&coord_x1,&coord_y1,&coord_x2,&coord_y2)) == 4 ) {
+                    SELECT(coord_x1,coord_y1,coord_x2,coord_y2);
+                    break;     
+                } else {
+                    SELECT_ALL();
+                    break;            
+                } 
+        // SELECT ALL
         case 2:
-                SELECT_ALL();
                 break;
-        
+
+        // ROTATE    
         case 3:
                 ROTATE(45);
                 break;
-            
+
+        // CROP   
         case 4:
                 CROP();
                 break;
             
+        // GREYSCALE    
         case 5:
                 GRAYSCALE();
                 break;
-            
+
+        // SEPIA    
         case 6:
                 SEPIA();
                 break;
-            
+        // SAVE    
         case 7:
                 SAVE();
                 break;
-            
+
+        // EXIT 
         case 8:
                 EXIT();
                 break;
-            
+
+        // INVALID COMMAND
         default:
             printf("Invalid command\n");
         
