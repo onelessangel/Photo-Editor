@@ -43,7 +43,7 @@ $ sudo apt-get install build-essential <br>
 $ sudo apt-get install imagemagick<br/> <br>
 • Documentation: man convert<br/>
 • Examples:<br/>
-    convert foo.jpg foo.ppm (transforms foo.jpg în foo.ppm, binary format)<br/>
-    convert foo.jpg foo.pgm (transforms foo.jpg în foo.pgm, grayscale format)<br/>
-    convert foo.jpg -compress None foo.ppm (transforms foo.jpg în foo.ppm, plain (ASCII) text format)<br/>
-    convert foo.jpg -compress None foo.pgm<br/>
+    convert foo.jpg foo.ppm (transforms foo.jpg în foo.ppm, binary RGB)<br/>
+    convert foo.jpg foo.pgm (transforms foo.jpg în foo.pgm, binary grayscale)<br/>
+    convert foo.jpg -compress None foo.ppm (transforms foo.jpg în foo.ppm, RGB ASCII)<br/>
+    convert foo.jpg -compress None foo.pgm transforms foo.jpg în foo.ppm, grayscale ASCII)<br/>
