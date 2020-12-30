@@ -40,7 +40,7 @@ To generate your own PNM and PGM files, use the "convert" utility that converts 
 • Setup: <br>
 $ sudo apt update <br>
 $ sudo apt-get install build-essential <br>
-$ sudo apt install imagemagick<br/> <br>
+$ sudo apt-get install imagemagick<br/> <br>
 • Documentation: man convert<br/>
 • Examples:<br/>
     convert foo.jpg foo.ppm (transforms foo.jpg în foo.ppm, binary format)<br/>
