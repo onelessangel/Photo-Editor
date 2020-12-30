@@ -45,5 +45,5 @@ $ sudo apt-get install imagemagick<br/> <br>
 • Examples:<br/>
     convert foo.jpg foo.ppm (transforms foo.jpg în foo.ppm, binary RGB)<br/>
     convert foo.jpg foo.pgm (transforms foo.jpg în foo.pgm, binary grayscale)<br/>
-    convert foo.jpg -compress None foo.ppm (transforms foo.jpg în foo.ppm, RGB ASCII)<br/>
-    convert foo.jpg -compress None foo.pgm transforms foo.jpg în foo.ppm, grayscale ASCII)<br/>
+    convert foo.jpg -compress None foo.ppm (transforms foo.jpg în foo.ppm, ASCII RGB)<br/>
+    convert foo.jpg -compress None foo.pgm transforms foo.jpg în foo.ppm, ASCII grayscale)<br/>
