@@ -38,9 +38,9 @@ I:EXIT<br/>
 # GENERATE YOUR OWN IMAGE:
 To generate your own PNM and PGM files, use the "convert" utility that converts png / jpeg / jpg files to these formats:<br/>
 • Setup: 
-$ sudo apt update 
-$ sudo apt-get install build-essential
-$ sudo apt install imagemagick<br/>
+$ sudo apt update <br>
+$ sudo apt-get install build-essential <br>
+$ sudo apt install imagemagick<br/> <br>
 • Documentation: man convert<br/>
 • Examples:<br/>
     convert foo.jpg foo.ppm (transforms foo.jpg în foo.ppm, binary format)<br/>
