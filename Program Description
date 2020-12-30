@@ -3,7 +3,7 @@ Documentation:
 2. http://netpbm.sourceforge.net/doc/ppm.html
 
 Implementation:
-This program is created without using the predefined libnetpbm C library, therefore only using the basic C libraries (stdio.h, string.h, stdlib.h, ..).
+This program is created without using the predefined libnetpbm C library, therefore only using the basic C libraries (stdio.h, string.h, stdlib.h, ..)
 
 Program operation
 Note: In this section, when you see, a text of the form <value> must be there.
