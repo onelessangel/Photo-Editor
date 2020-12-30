@@ -4,13 +4,14 @@
 #define __SUPPORT_H_
 
 // This function loads the image from the file.
-void LOAD(const char*);
+// and keeps the width and the height
+void LOAD(const char*,int*,int*);
 
 // This function selects a part of the area.
-void SELECT(int, int, int, int);
+void SELECT(int*, int*, int*, int*, int*, int*);
 
 // This function selects the whole area.
-void SELECT_ALL(void);
+void SELECT_ALL(int*, int*);
 
 // This function rotates the image by a certain angle.
 void ROTATE(const int);
@@ -30,19 +31,22 @@ void SAVE(void);
 // This function closes the program.
 void EXIT(void);
 
-// This function returns a value between 0 - 7 representing
-// the position in the command list of the received input
-// and returns -1 if it doesn't exist
-int find_command_value(const char**, const char*);
-
 // This functions checks if an valid command has been received
 // and,if true, executes the corresponding function
-void check_command(const int);
+void check_command(const int, int*, int*,int*,int*, int*,int*,int*);
+
+// This functions allocates the memory for the image pixels
+// and copies the pixels from the file in a matrix shape
+unsigned char** read_pixels(const int, const int, FILE*);
+
+// This functions frees the memory from the currently loaded image.
+void free_pixels(const int, unsigned char***);
 
 // Exit status
 enum {
     SUCCESS=0,
     ERROR=1,
 };
+
 
 #endif
