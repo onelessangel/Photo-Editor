@@ -1,4 +1,4 @@
-# Text-based-User-Interface-photo-editor
+# Text-based-User-Interface-PhotoEditor
 
 Chelcea Claudiu Marian
 
