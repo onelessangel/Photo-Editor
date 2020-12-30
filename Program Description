@@ -58,7 +58,7 @@ respectively in the range [y1, y2] on the Y axis (image height).
 - Available only for color images, this command will transform the selection from the image into grayscale.
 - Pixel values will be calculated according to the following formula:
 ∗ newRed = newGreen = newBlue = (Red + Greed + Blue) / 3
-- The output will be: "The gray filter has been added."
+- The output will be: "The gray filter has been applied."
 - If the current image is this RGB, the command will respond with “Grayscale filter not available” and it will leave the image unchanged.
 
 # • SEPIA
@@ -68,7 +68,7 @@ respectively in the range [y1, y2] on the Y axis (image height).
 ∗ New Green = 0.349 * R + 0.686 * G + 0.168 * B
 ∗ new blue = 0.272 * R + 0.534 * G + 0.131 * B
 - If there is a pixel exceeding the maximum, then we will apply the function max between calculated and maximum value.
-- The output will be: "Sepia filter added".
+- The output will be: "Sepia filter applied.
 - If the current image is grayscale, the command will respond with "Sepia filter not available" and it will leave the image unchanged.
 
 # • SAVE <filename> [ascii]
