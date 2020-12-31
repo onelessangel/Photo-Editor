@@ -25,20 +25,12 @@ int main(void) {
 
     // Alocate space for command name
     char *input = user_input();
-    
-// SSS
-// SDSD FDSFSDF
-// SELECT ALL
-// SELECT 23 4 32 35
-// select x d gfd s
-// SELECT X 53 G 2
 
     // Receive commands and execute them
     while(UP) {
         scanf("%s",input);
 
         // Check what command is given and if it exists.
-       
         int command_value = find_command_value(commands, input);
 
         // If it exists, execute it.
