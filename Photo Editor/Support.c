@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #define NAME_LENGTH_MAX 100
 
 // Image properties
@@ -235,8 +236,17 @@ void EXIT(void){
 // and,if true, executes the corresponding function
 void check_command(int command_value, int *width,  int *height, int *image_status,int *x1, int *y1, int *x2, int *y2)
 {
-    char *file_name= (char*) malloc(NAME_LENGTH_MAX*sizeof(char));
+    if(command_value ==  -1) {
+        char error_input[100];
+        fgets(error_input,100,stdin);
+        error_input[strlen(error_input)-1]='\0';
+        printf("Invalid command\n");
+        return;
 
+    }
+    
+    char *file_name= (char*) malloc(NAME_LENGTH_MAX*sizeof(char));
+    
     switch(command_value) {
         
         // LOAD
@@ -253,17 +263,13 @@ void check_command(int command_value, int *width,  int *height, int *image_statu
                         SELECT(x1,y1,x2,y2,width,height);
                     else 
                         printf("No image loaded\n");
-                    break;     
-                // SELECT ALL PIXELS
-                } else {
-                    SELECT_ALL(width,height);
-                    break;            
-                } 
-
-        // CASE FOR SELECT ALL PIXELS  
-        case 2:
-            printf("Invalid command\n");
-           
+                    
+                }
+                break;     
+                
+        // SELECT ALL
+        case 2:   
+            SELECT_ALL(width,height);
             break;
 
         // ROTATE    
