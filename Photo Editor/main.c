@@ -16,28 +16,28 @@ enum {
 
 int main(void) {
     
-    // Set commands
+    // Set IMAGE
+    unsigned char **image = NULL;
     int width = 0, height = 0, image_status=DOWN;
     int x1=0,y1=0,x2=0,y2=0;
+
+    // Set COMMAND
     const char *commands[DEFINED_COMMANDS] = {"LOAD","SELECT","SELECT ALL","ROTATE","CROP","GRAYSCALE","SEPIA","SAVE","EXIT"};
     if(commands == NULL)
         return NULL_LIST;
-
-    // Alocate space for command name
     char *input = user_input();
 
     // Receive commands and execute them
     while(UP) {
         scanf("%s",input);
 
-        // Check what command is given and if it exists.
+        // Check what command is given and whether it exists or not.
         int command_value = find_command_value(commands, input);
 
         // If it exists, execute it.
-        check_command(command_value, &width, &height, &image_status,&x1,&y1,&x2,&y2);
+        check_command(command_value, &width, &height, &image_status,&x1,&y1,&x2,&y2,&image,&input);
+        //printf("My coordinates are x1:%d y1:%d x2:%d y2:%d\n",x1,y1,x2,y2);
     }
-
-    free(input);
 
     return SUCCESS;
 }
