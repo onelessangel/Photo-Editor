@@ -33,9 +33,29 @@ int find_command_value(const char *commands[], char* input)
             command_value=i;
             break;
         }
+    char a=0,b=0,c=0,d=0;
+    char wrong_input[100];
 
-    if(strcmp("ALL",input)==0 || command_value == -1) 
-        command_value=2;
+    if(command_value==1)  {
+        scanf("%c%c%c%c",&a,&b,&c,&d);
+        if(a!=' ' || b!='A' || c!='L' || d != 'L') {
+            ungetc(d,stdin);
+            ungetc(c,stdin);
+            ungetc(b,stdin);
+            ungetc(a,stdin);
+        
+        } else {
+            ungetc(d,stdin);
+            ungetc(c,stdin);
+            ungetc(b,stdin);
+            ungetc(a,stdin);
+            scanf("%s",wrong_input);
+            if(strlen(wrong_input) == 3)
+                command_value=2;
+            else command_value=-1;
+        }
+    }
+        
 
     return command_value;
 }
