@@ -4,6 +4,13 @@
 #include <stdlib.h>
 #include <string.h>
 #define NAME_LENGTH_MAX 100
+#define TRUE 1
+#define FALSE 0
+/*
+    TO DO:
+    *CHECK FOR MORE OUTPUT --- LOAD <file> <trash> -> error
+    *FIX ROTATE
+*/
 
 // Image properties
 typedef struct {
@@ -16,9 +23,10 @@ typedef struct {
 // File status
 enum {
     FILE_OPEN_ERROR = 4,
-    FIle_CLOSE_ERROR = 5,
+    FILE_CLOSE_ERROR = 5,
     SUCCESS = 0,
-    ERROR = -1
+    ERROR = -1,
+    EXTRA_SPACE = 1000
 };
 
 // Image status
@@ -44,6 +52,24 @@ unsigned char** read_pixels(const int my_image_width,const int my_image_height, 
     return pixel_matrix; 
 }
 
+// This functions creates a copy of the current selection
+unsigned char** copy_pixels_selection(const int x1, const int y1, const int x2, const int y2, unsigned char*** image) {
+
+    // Memory allocation
+    int my_image_width=y2-y1;
+    int my_image_height=x2-x1;
+
+    unsigned char** pixel_matrix = (unsigned char**) malloc((my_image_width+EXTRA_SPACE)* sizeof(unsigned char*));
+    for(int i=0;i<my_image_height;i++) pixel_matrix[i] = (unsigned char*) malloc((my_image_height+EXTRA_SPACE) * sizeof(unsigned char));
+    
+    // Copy values
+    for(int i=0;i<my_image_height;i++) 
+        for(int j=0;j<my_image_width;j++) 
+            pixel_matrix[i][j]=(*image)[x1+i][y1+j];
+
+    return pixel_matrix; 
+}
+
 // This functions frees the memory from the currently loaded image.
 void free_pixels(const int my_image_height,unsigned char*** pixel_matrix)
 {
@@ -55,13 +81,14 @@ void free_pixels(const int my_image_height,unsigned char*** pixel_matrix)
 }
 
 // This function loads the image from the file.
-int LOAD(const char *file_name, int *width, int *height) {
+unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, int* y1, int* x2, int* y2) {
     
     FILE *file = fopen(file_name,"rt");
     if(file==NULL) {
         printf("Failed to load %s\n",file_name);
-        return ERROR;
+        return (unsigned char**) ERROR;
     }
+
 
     char b,c;
     fscanf(file,"%c",&b);
@@ -72,7 +99,7 @@ int LOAD(const char *file_name, int *width, int *height) {
         // DO STUFF WITH GRAYSCALE - ASCII
         
         fscanf(file,"%d %d %d",&my_image.width,&my_image.height,&my_image.max_value);
-        
+      
         unsigned char** pixels = read_pixels(my_image.width,my_image.height,file); 
         if(pixels != NULL)
             printf("Loaded %s\n",file_name);
@@ -80,12 +107,15 @@ int LOAD(const char *file_name, int *width, int *height) {
         // COD SUPLIMENTAR
         *width = my_image.width;
         *height = my_image.height;
-        
-        free_pixels(my_image.height,&pixels);
+        *x1=0;
+        *y1=0;
+        *x2=my_image.height;
+        *y2=my_image.width;
         if(fclose(file) == EOF)
-            exit(FIle_CLOSE_ERROR);
+            return (unsigned char**) FILE_CLOSE_ERROR;
 
-        return SUCCESS;
+        return pixels;
+    //free_pixels(my_image.height,&pixels);
 
     }
 
@@ -100,27 +130,35 @@ int LOAD(const char *file_name, int *width, int *height) {
         // COD SUPLIMENTAR
         *width = my_image.width;
         *height = my_image.height;
-        free_pixels(my_image.height,&pixels);
-        if(fclose(file) == EOF)
-            exit(FIle_CLOSE_ERROR);
-        return SUCCESS;
+        *x1  = 0;
+        *y1=0;
+        *x2=my_image.height;
+        *y2=my_image.width;
 
-    }
+        if(fclose(file) == EOF)
+            return (unsigned char**) FILE_CLOSE_ERROR;
+
+        return pixels;
+
+        //free_pixels(my_image.height,&pixels);
+
+     }
 
     else {
         ungetc(b,file);
         ungetc(c,file);
 
         if(fclose(file) == EOF)
-            exit(FIle_CLOSE_ERROR);
+            return (unsigned char**) FILE_CLOSE_ERROR;
 
         FILE *file_bin = fopen(file_name,"rb");
         if(file_bin==NULL) 
-            exit(FILE_OPEN_ERROR);
+            return (unsigned char**) FILE_OPEN_ERROR;
         
 
         for(int i=0;i<5;i++) 
             fread(&c,sizeof(char),1,file_bin);
+
         getc(file_bin);
 
         if(c=='3') {
@@ -147,8 +185,9 @@ int LOAD(const char *file_name, int *width, int *height) {
         //*width = my_image.width;
        // *height = my_image.height;
             if(fclose(file_bin) == EOF)
-               exit(FIle_CLOSE_ERROR);
-            return SUCCESS;
+               return (unsigned char**) FILE_CLOSE_ERROR;
+
+            return (unsigned char**)SUCCESS;
         }
         else if(c=='4') {
         //    if(pixels != NULL)
@@ -161,12 +200,13 @@ int LOAD(const char *file_name, int *width, int *height) {
    // *width = my_image.width;
       //  *height = my_image.height;
             if(fclose(file_bin) == EOF)
-                exit(FIle_CLOSE_ERROR);
-            return SUCCESS;
+               return (unsigned char**) FILE_CLOSE_ERROR;
+
+            return (unsigned char**) SUCCESS;
         }
     }
 
-    return SUCCESS;
+    return (unsigned char**) SUCCESS;
 
 }
 
@@ -174,9 +214,9 @@ int LOAD(const char *file_name, int *width, int *height) {
 void SELECT(int* x1, int* y1, int* x2, int* y2, int *width, int *height){
     if(*x1<0 || *x2 < 0 || *y1 < 0 || *y2 < 0) 
         printf("Invalid coordinates\n");
-    else if(*x1>*height || *x2 > *height)
+    else if(*x1> *height || *x2 > *height)
         printf("Invalid coordinates\n");
-    else if(*y1>*width || *y2 > *width)
+    else if(*y1> *width || *y2 > *width)
         printf("Invalid coordinates\n");
     else
         printf("Selected %d %d %d %d\n",*x1,*y1,*x2,*y2);
@@ -196,13 +236,53 @@ void SELECT(int* x1, int* y1, int* x2, int* y2, int *width, int *height){
 }
 
 // This function selects the whole area.
-void SELECT_ALL(int *width, int *height){
-    printf("SELECT ALL from %d to %d\n",*width,*height);
+void SELECT_ALL(int *width, int *height, int *x1, int *y1, int *x2, int *y2){
+    *x1=0;
+    *y1=0;
+    *x2=*height;
+    *y2=*width;
+    printf("Selected ALL\n");
 }
 
 // This function rotates the image by a certain angle.
-void ROTATE(const int angle) {
-    printf("ROTATE by %d\n",angle);
+void ROTATE(int angle, unsigned char*** image, const int x1, const int y1, const int x2, const int y2, const int whole_map_selected) {
+    
+   
+    // Create copy of the current selection
+    unsigned char** pixels = copy_pixels_selection(x1,y1,x2,y2,image); 
+    if( pixels == NULL) 
+        return;
+
+    // for(int i = 0 ; i < x2-x1; i++) {printf("\n");
+    //     for(int j=0;j<y2-y1;j++) printf("%hhu",pixels[i][j]);}
+    if(!whole_map_selected) {}
+        if(angle==-90) angle = 270;
+        if(angle==-180) angle = 180;
+        if(angle==-270) angle = 90;
+
+        if(angle == 90) {
+            for(int i=0;i<(x2-x1);i++) 
+                for(int j=0;j<(y2-y1);j++) 
+                    (*image)[x1+i][y1+j]=pixels[x2-j][y1+i];
+        }
+        else if(angle == 180) {
+            for(int i=0;i<(x2-x1);i++) 
+                for(int j=0;j<(y2-y1);j++) 
+                    (*image)[x1+i][y1+j]=pixels[x2-i][y1+j];
+        } 
+        else if(angle == 270) {
+            for(int i=0;i<(x2-x1);i++) 
+                for(int j=0;j<(y2-y1);j++) 
+                    (*image)[x1+i][y1+j]=pixels[x1+i][y2-j];
+        } 
+    
+    else if(whole_map_selected) {
+        printf("ROTATE WHOLE MAP, REVERSE ALLOCATE\n");
+    }
+
+    printf("Rotated %d\n",angle);
+    free_pixels((x2-x1),&pixels);
+
 }
 
 // This function crops the image.
@@ -226,7 +306,8 @@ void SAVE(void){
 }
 
 // This function closes the program.
-void EXIT(void){
+void EXIT(char ** input){
+    free(*input);
     exit(EXIT_SUCCESS);
 }
 
@@ -234,7 +315,7 @@ void EXIT(void){
   
 // This functions checks if an valid command has been received
 // and,if true, executes the corresponding function
-void check_command(int command_value, int *width,  int *height, int *image_status,int *x1, int *y1, int *x2, int *y2)
+void check_command(int command_value, int *width,  int *height, int *image_status,int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input)
 {
     if(command_value ==  -1) {
         char error_input[100];
@@ -246,38 +327,66 @@ void check_command(int command_value, int *width,  int *height, int *image_statu
     }
     
     char *file_name= (char*) malloc(NAME_LENGTH_MAX*sizeof(char));
+    int replace1=0,replace2=0,replace3=0,replace4=0, angle=0;
+    int no_image_loaded=0;
+    int whole_map_selected=0;
     
     switch(command_value) {
         
         // LOAD
         case 0:
+        
             scanf("%s",file_name);
-            if(LOAD(file_name,width,height)==SUCCESS) *image_status=UP;
+            *image = LOAD(file_name,width,height,x1,y1,x2,y2);
+            if(*image != NULL)
+                *image_status=UP;
+
             break;
 
-        // SELECT
+       // SELECT
         case 1:
                 // SELECT WITH COORDINATES
-                if((scanf("%d %d %d %d",x1,y1,x2,y2)) == 4 ) {
+                if((scanf("%d %d %d %d",&replace1,&replace2,&replace3,&replace4)) == 4 ) {
                     if(*image_status == UP)
+                    {
+                        *x1=replace1;
+                        *y1=replace2;
+                        *x2=replace3;
+                        *y2=replace4;
                         SELECT(x1,y1,x2,y2,width,height);
-                    else 
+                    }
+                    else  {
                         printf("No image loaded\n");
+                        no_image_loaded=1;
+                    }
                     
                 }
                 break;     
                 
         // SELECT ALL
         case 2:   
-            SELECT_ALL(width,height);
+            SELECT_ALL(width,height,x1,y1,x2,y2);
             break;
 
         // ROTATE    
         case 3:
-                if(*image_status == UP)
-                    ROTATE(45);
-                else 
+               if(scanf("%d",&angle)) {
+                    if(*image_status == UP) {
+                        if(angle != 90 && angle !=-90 && angle != 180 && angle !=-180 && angle !=270 && angle !=-270)
+                            printf("Invalid parameters\n");
+                        else if( ( (*x2-*x1) != (*y2-*y1)) && (*x1!=0 || *y1 !=0 || *x2!=*height || *y2 !=*width))
+                            printf("The selection must be square\n");
+                        else {
+                            if(*x1==0 && *y1==0 && *x2== *height && *y2 == *width)
+                                whole_map_selected = 1;
+                            ROTATE(angle, image,*x1,*y1,*x2,*y2,whole_map_selected);
+                        }
+                        
+                    } else  {
                         printf("No image loaded\n");
+                        no_image_loaded=1;
+                        }
+                }
                 break;
 
         // CROP   
@@ -287,35 +396,42 @@ void check_command(int command_value, int *width,  int *height, int *image_statu
             
         // GREYSCALE    
         case 5:
-            if(*image_status == UP)
+           if(*image_status == UP)
                 GRAYSCALE();
-            else 
-                    printf("No image loaded\n");
+            else  {
+                printf("No image loaded\n");
+                no_image_loaded=1;
+            }
                 break;
 
         // SEPIA    
         case 6:
             if(*image_status == UP)
                 SEPIA();
-            else 
-                    printf("No image loaded\n");
+                    else  {
+                        printf("No image loaded\n");
+                        no_image_loaded=1;
+                    }
                 break;
         // SAVE    
         case 7:
             if(*image_status == UP)
                 SAVE();
-            else 
-                    printf("No image loaded\n");
-                break;
+            else  {
+                printf("No image loaded\n");
+                no_image_loaded=1;
+            }
+            break;
 
         // EXIT 
         case 8:
-                EXIT();
+                EXIT(input);
                 break;
 
         // INVALID COMMAND
         default:
-            printf("Invalid command\n");
+            if(no_image_loaded==1)
+                printf("Invalid command\n");
             break;
         
     }
