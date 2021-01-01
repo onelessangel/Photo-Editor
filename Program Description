@@ -67,7 +67,7 @@ respectively in the range [y1, y2] on the Y axis (image height).
 ∗ new Red = 0.393 * R + 0.769 * G + 0.189 * B
 ∗ New Green = 0.349 * R + 0.686 * G + 0.168 * B
 ∗ new blue = 0.272 * R + 0.534 * G + 0.131 * B
-- If there is a pixel exceeding the maximum, then we will apply the function max between calculated and maximum value.
+- If there is a pixel exceeding the maximum, then we will apply the function min between calculated and minimum value.
 - The output will be: "Sepia filter applied.
 - If the current image is grayscale, the command will respond with "Sepia filter not available" and it will leave the image unchanged.
 
