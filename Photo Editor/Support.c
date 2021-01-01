@@ -9,7 +9,9 @@
 /*
     TO DO:
     *CHECK FOR MORE OUTPUT --- LOAD <file> <trash> -> error
-    *FIX ROTATE
+    *CHECK FOR COMMENTS (only on the line before the matrix) -- use this: all values are less or equal to 255
+    *CHECK FOR BINARY FILES
+    *FREE MEMORY WHERE POSSIBLE
 */
 
 // Image properties
@@ -26,7 +28,6 @@ enum {
     FILE_CLOSE_ERROR = 5,
     SUCCESS = 0,
     ERROR = -1,
-    EXTRA_SPACE = 1000
 };
 
 // Image status
@@ -38,6 +39,7 @@ enum {
 // This functions allocates the memory for the image pixels
 // and saves the pixels in a matrix shape
 unsigned char** read_pixels(const int my_image_width,const int my_image_height, FILE* file) {
+
     unsigned char** pixel_matrix = (unsigned char**) malloc(my_image_width * sizeof(unsigned char*));
 
     for(int i=0;i<my_image_height;i++) pixel_matrix[i] = (unsigned char*) malloc(my_image_height * sizeof(unsigned char));
@@ -59,8 +61,9 @@ unsigned char** copy_pixels_selection(const int x1, const int y1, const int x2, 
     int my_image_width=y2-y1;
     int my_image_height=x2-x1;
 
-    unsigned char** pixel_matrix = (unsigned char**) malloc((my_image_width+EXTRA_SPACE)* sizeof(unsigned char*));
-    for(int i=0;i<my_image_height;i++) pixel_matrix[i] = (unsigned char*) malloc((my_image_height+EXTRA_SPACE) * sizeof(unsigned char));
+    unsigned char** pixel_matrix = (unsigned char**) malloc((my_image_width)* sizeof(unsigned char*));
+    for(int i=0;i<my_image_height;i++) 
+        pixel_matrix[i] = (unsigned char*) malloc((my_image_height) * sizeof(unsigned char));
     
     // Copy values
     for(int i=0;i<my_image_height;i++) 
@@ -213,11 +216,11 @@ unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, in
 // This function selects a part of the area.
 void SELECT(int* x1, int* y1, int* x2, int* y2, int *width, int *height){
     if(*x1<0 || *x2 < 0 || *y1 < 0 || *y2 < 0) 
-        printf("Invalid coordinates\n");
+        printf("Invalid coordinates1\n");
     else if(*x1> *height || *x2 > *height)
-        printf("Invalid coordinates\n");
+        printf("Invalid coordinates2\n");
     else if(*y1> *width || *y2 > *width)
-        printf("Invalid coordinates\n");
+        printf("Invalid coordinates3 %d %d -> %d\n",*y1,*y2,*width);
     else
         printf("Selected %d %d %d %d\n",*x1,*y1,*x2,*y2);
 
@@ -245,44 +248,117 @@ void SELECT_ALL(int *width, int *height, int *x1, int *y1, int *x2, int *y2){
 }
 
 // This function rotates the image by a certain angle.
-void ROTATE(int angle, unsigned char*** image, const int x1, const int y1, const int x2, const int y2, const int whole_map_selected) {
+void ROTATE(int angle, unsigned char*** image, int *x1, int *y1, int *x2, int *y2, const int whole_map_selected, int *width, int *height) {
     
-   
-    // Create copy of the current selection
-    unsigned char** pixels = copy_pixels_selection(x1,y1,x2,y2,image); 
-    if( pixels == NULL) 
-        return;
+    if(!whole_map_selected) {
 
-    // for(int i = 0 ; i < x2-x1; i++) {printf("\n");
-    //     for(int j=0;j<y2-y1;j++) printf("%hhu",pixels[i][j]);}
-    if(!whole_map_selected) {}
-        if(angle==-90) angle = 270;
-        if(angle==-180) angle = 180;
-        if(angle==-270) angle = 90;
+        // Create copy of the current selection
+        unsigned char** pixels = copy_pixels_selection(*x1,*y1,*x2,*y2,image); 
+        if( pixels == NULL) 
+            return;
 
-        if(angle == 90) {
-            for(int i=0;i<(x2-x1);i++) 
-                for(int j=0;j<(y2-y1);j++) 
-                    (*image)[x1+i][y1+j]=pixels[x2-j][y1+i];
+        if(angle == 90 || angle == -270) {
+            for(int i=0;i<(*x2-*x1);i++) 
+                for(int j=0;j<(*y2-*y1);j++) 
+                    (*image)[*x1+i][*y1+j]=pixels[*x2-1-j][*y1+i];
         }
-        else if(angle == 180) {
-            for(int i=0;i<(x2-x1);i++) 
-                for(int j=0;j<(y2-y1);j++) 
-                    (*image)[x1+i][y1+j]=pixels[x2-i][y1+j];
+        else if(angle == 180 || angle == -180) {
+            for(int i=0;i<(*x2-*x1);i++) 
+                for(int j=0;j<(*y2-*y1);j++) 
+                    (*image)[*x1+i][*y1+j]=pixels[*x2-1-i][*y2-1-j];
         } 
-        else if(angle == 270) {
-            for(int i=0;i<(x2-x1);i++) 
-                for(int j=0;j<(y2-y1);j++) 
-                    (*image)[x1+i][y1+j]=pixels[x1+i][y2-j];
-        } 
-    
+        else if(angle == 270 || angle == -90) {
+            for(int i=0;i<(*x2-*x1);i++) 
+                for(int j=0;j<(*y2-*y1);j++) 
+                    (*image)[*x2-1-j][*y1+i]=pixels[*x1+i][*y1+j];
+        }  
+        free_pixels((*x2-*x1),&pixels);
+    }
+
     else if(whole_map_selected) {
-        printf("ROTATE WHOLE MAP, REVERSE ALLOCATE\n");
+
+        if(angle == 90 || angle == -270) {
+            
+            // Memory allocation
+            int max_size = *height;
+            if (max_size < *width) max_size = *width;
+
+            unsigned char** pixel_matrix = (unsigned char**) calloc(max_size, sizeof(unsigned char*));
+
+            for(int i=0;i<max_size;i++) 
+                pixel_matrix[i] = (unsigned char*) calloc(max_size, sizeof(unsigned char));
+
+            // Copy values
+            int p=0;
+            for(int i=0;i<*width;i++) {
+                for(int j=0;j<*height;j++) {
+                    pixel_matrix[i][j]=(*image)[*height -1 - j][p];
+                    if(j==(*height-1)) p++;
+                }
+            
+            }
+
+            *image=pixel_matrix;
+            int aux = *width;
+            *width=*height;
+            *height=aux;
+            *x2=*height;
+            *y2=*width;
+
+        }
+
+        else if(angle == 180 || angle == -180) {
+            // Memory allocation
+            unsigned char** pixel_matrix = (unsigned char**) malloc(*width * sizeof(unsigned char*));
+
+            for(int i=0;i<*width;i++) 
+                pixel_matrix[i] = (unsigned char*) malloc(*height * sizeof(unsigned char));
+
+            // Copy values
+            for(int i=0;i<*height;i++) {
+                for(int j=0;j<*width;j++) {
+                    pixel_matrix[i][j]=(*image)[i][j];
+                }
+            }
+
+            for(int i=0;i<*height;i++) {
+                for(int j=0;j<*width;j++) {
+                (*image)[i][j]=pixel_matrix[*height-1-i][*width-1-j];
+
+                }
+            }
+
+        } 
+
+        else if(angle == 270 || angle == -90) {
+            // Memory allocation
+            int max_size = *height;
+            if (max_size < *width) max_size = *width;
+
+            unsigned char** pixel_matrix = (unsigned char**) calloc(max_size, sizeof(unsigned char*));
+
+            for(int i=0;i<max_size;i++) 
+                pixel_matrix[i] = (unsigned char*) calloc(max_size, sizeof(unsigned char));
+
+            // Copy values
+            for(int i=0;i<*width;i++) {
+                for(int j=0;j<*height;j++) {
+                    pixel_matrix[i][j]=(*image)[j][*width-1-i];
+                }
+            
+            }
+
+            *image=pixel_matrix;
+            int aux = *width;
+            *width=*height;
+            *height=aux;
+            *x2=*height;
+            *y2=*width;
+
+        }
     }
 
     printf("Rotated %d\n",angle);
-    free_pixels((x2-x1),&pixels);
-
 }
 
 // This function crops the image.
@@ -373,13 +449,13 @@ void check_command(int command_value, int *width,  int *height, int *image_statu
                if(scanf("%d",&angle)) {
                     if(*image_status == UP) {
                         if(angle != 90 && angle !=-90 && angle != 180 && angle !=-180 && angle !=270 && angle !=-270)
-                            printf("Invalid parameters\n");
+                            {printf("Invalid parameters\n"); no_image_loaded=1;}
                         else if( ( (*x2-*x1) != (*y2-*y1)) && (*x1!=0 || *y1 !=0 || *x2!=*height || *y2 !=*width))
-                            printf("The selection must be square\n");
+                            {printf("The selection must be square\n");no_image_loaded=1;}
                         else {
                             if(*x1==0 && *y1==0 && *x2== *height && *y2 == *width)
                                 whole_map_selected = 1;
-                            ROTATE(angle, image,*x1,*y1,*x2,*y2,whole_map_selected);
+                            ROTATE(angle, image,x1,y1,x2,y2,whole_map_selected,width,height);
                         }
                         
                     } else  {
@@ -408,11 +484,12 @@ void check_command(int command_value, int *width,  int *height, int *image_statu
         case 6:
             if(*image_status == UP)
                 SEPIA();
-                    else  {
-                        printf("No image loaded\n");
-                        no_image_loaded=1;
-                    }
-                break;
+            else  {
+                printf("No image loaded\n");
+                no_image_loaded=1;
+            }
+            break;
+            
         // SAVE    
         case 7:
             if(*image_status == UP)
