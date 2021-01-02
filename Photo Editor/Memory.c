@@ -59,3 +59,50 @@ int find_command_value(const char *commands[], char* input)
 
     return command_value;
 }
+
+// This functions allocates the memory for the image pixels
+// and saves the pixels in a matrix shape
+unsigned char** read_pixels(const int my_image_width,const int my_image_height, FILE* file) {
+
+    unsigned char** pixel_matrix = (unsigned char**) malloc(my_image_width * sizeof(unsigned char*));
+
+    for(int i=0;i<my_image_height;i++) pixel_matrix[i] = (unsigned char*) malloc(my_image_height * sizeof(unsigned char));
+
+    for(int i=0;i<my_image_height;i++) 
+        pixel_matrix[i] = malloc(my_image_width * sizeof(unsigned char));
+    
+    for(int i=0;i<my_image_height;i++) 
+        for(int j=0;j<my_image_width;j++) 
+            fscanf(file,"%hhu",&pixel_matrix[i][j]);
+
+    return pixel_matrix; 
+}
+
+// This functions creates a copy of the current selection
+unsigned char** copy_pixels_selection(const int x1, const int y1, const int x2, const int y2, unsigned char*** image) {
+
+    // Memory allocation
+    int my_image_width=y2-y1;
+    int my_image_height=x2-x1;
+
+    unsigned char** pixel_matrix = (unsigned char**) malloc((my_image_width)* sizeof(unsigned char*));
+    for(int i=0;i<my_image_height;i++) 
+        pixel_matrix[i] = (unsigned char*) malloc((my_image_height) * sizeof(unsigned char));
+    
+    // Copy values
+    for(int i=0;i<my_image_height;i++) 
+        for(int j=0;j<my_image_width;j++) 
+            pixel_matrix[i][j]=(*image)[x1+i][y1+j];
+
+    return pixel_matrix; 
+}
+
+// This functions frees the memory from the currently loaded image.
+void free_pixels(const int my_image_height,unsigned char*** pixel_matrix)
+{
+    
+    for(int i=0;i<my_image_height;i++) 
+            free((*pixel_matrix)[i]);
+
+    free(*pixel_matrix);
+}
