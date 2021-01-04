@@ -5,9 +5,10 @@
 #include <string.h>
 #include "Memory.h"
 
-// This function loads the image from the file.
+// This function loads the image from the file
+// and keeps the width and the height.
 unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, int* y1, int* x2,
- int* y2,int* color_image, char *type, int* my_image_max) {
+ int* y2,int* color_image, char *type, int* my_image_max,int* no_image_loaded) {
     
     FILE *file = fopen(file_name,"rt");
     if(file==NULL) {
@@ -27,9 +28,11 @@ unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, in
         fscanf(file,"%d %d %d",&my_image.width,&my_image.height,my_image_max);
 
         // Copy image
-        unsigned char** pixels = read_pixels(my_image.width,my_image.height,file); 
-        if(pixels != NULL)
+        unsigned char** pixels = NULL;
+        pixels = read_pixels(my_image.width,my_image.height,file); 
+        if(pixels != NULL) {
             printf("Loaded %s\n",file_name);
+            *no_image_loaded = 0;}
 
         // Set new values for coordinates and dimensions, type and color
         *width = my_image.width;
@@ -54,9 +57,12 @@ unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, in
         fscanf(file,"%d %d %d",&my_image.width,&my_image.height,my_image_max);
 
         // Copy image
-        unsigned char** pixels = read_pixels(my_image.width*3,my_image.height,file); 
-        if(pixels != NULL)
+        unsigned char** pixels = NULL;
+        pixels = read_pixels(my_image.width*3,my_image.height,file); 
+        if(pixels != NULL) {
             printf("Loaded %s\n",file_name);
+            *no_image_loaded=0;
+        }
 
         // Set new values for coordinates and dimensions, type and color
         *width = (my_image.width*3);
@@ -111,9 +117,12 @@ unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, in
         if(second_character=='G') {
         
             // Read the image
-            unsigned char** pixels = read_pixels_binary(my_width,my_height,file_bin); 
-            if(pixels != NULL)
+            unsigned char** pixels = NULL;
+            pixels = read_pixels_binary(my_width,my_height,file_bin); 
+            if(pixels != NULL) {
                 printf("Loaded %s\n",file_name);
+                *no_image_loaded=0;
+            }
 
             // Modify the dimensions
             *width = my_width;
@@ -136,9 +145,12 @@ unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, in
         else if(second_character=='R') {
             
             // Read the image
-            unsigned char** pixels = read_pixels_binary(my_width*3,my_height,file_bin); 
-            if(pixels != NULL)
+            unsigned char** pixels = NULL;
+            pixels = read_pixels_binary(my_width*3,my_height,file_bin); 
+            if(pixels != NULL) {
                 printf("Loaded %s\n",file_name);
+                *no_image_loaded=0;
+            }
             
             // Modify the dimensions
             *width = my_width*3;
@@ -201,7 +213,7 @@ void SELECT_ALL(int *width, int *height, int *x1, int *y1, int *x2, int *y2){
     printf("Selected ALL\n");
 }
 
-// This function rotates the image by a certain angle.
+// This function rotates the image or a selection of pixels from the image by a certain angle.
 void ROTATE(int angle, unsigned char*** image, int *x1, int *y1, int *x2, int *y2, const int whole_map_selected, int *width, int *height) {
     
     // Case one: only a part of the image is selected (a square submatrix)
@@ -299,7 +311,7 @@ void ROTATE(int angle, unsigned char*** image, int *x1, int *y1, int *x2, int *y
             }
 
             // Free the matrix copy
-            free_pixels(max_size -1,&pixel_matrix);
+            free_pixels(max_size,&pixel_matrix);
         } 
 
         // Rotate to 270/-90 degrees
@@ -338,6 +350,7 @@ void ROTATE(int angle, unsigned char*** image, int *x1, int *y1, int *x2, int *y
 
 // This function crops the image.
 void CROP(int *x1, int *y1, int *x2,int *y2,int *width,int* height) {
+
     *height=*x2-*x1;
     *width=*y2-*y1;
     printf("Image cropped\n");
@@ -346,10 +359,14 @@ void CROP(int *x1, int *y1, int *x2,int *y2,int *width,int* height) {
 // This function will turn the image to grayscale format.
 void GRAYSCALE(int *x1,int *y1,int *x2,int *y2,unsigned char*** image) {
     double RGB_2_GRAYSCALE=0.00;
+    int RGB_int;
     for(int i=*x1;i<*x2;i++)
         for(int j=*y1;j<*y2;j=j+3) {
+
+            // Formula for RGB
             RGB_2_GRAYSCALE=((*image)[i][j]+(*image)[i][j+1]+(*image)[i][j+2])/3.0;
-            (*image)[i][j]=(*image)[i][j+1]=(*image)[i][j+2]=RGB_2_GRAYSCALE;
+            RGB_int = RGB_2_GRAYSCALE;
+            (*image)[i][j]=(*image)[i][j+1]=(*image)[i][j+2]=RGB_int;
         }
 
     printf("Grayscale filter applied\n");
@@ -367,19 +384,23 @@ void SEPIA(int *x1,int *y1,int *x2,int *y2,unsigned char*** image, const int my_
     int R_int, G_int,B_int;
     for(int i=*x1;i<*x2;i++)
         for(int j=*y1;j<*y2;j=j+3) {
-
+            
+            // Formula for SEPIA red color.
             R=0.393*(*image)[i][j] + 0.769*(*image)[i][j+1] + 0.189* (*image)[i][j+2];
             R_int = R;
             if(R_int>my_image_max) R_int = minimum_value(R_int,my_image_max);
 
+            // Formula for SEPIA green color.
             G=0.349*(*image)[i][j] + 0.686*(*image)[i][j+1] + 0.168* (*image)[i][j+2];
             G_int = G;
             if(G_int>my_image_max) G_int = minimum_value(G_int,my_image_max);
 
+            // Formula for SEPIA blue color.
             B=0.272*(*image)[i][j] + 0.534*(*image)[i][j+1] + 0.131* (*image)[i][j+2];
             B_int = B;
             if(B_int>my_image_max) B_int = minimum_value(B_int,my_image_max);
 
+            // Apply the new colors
             (*image)[i][j]=R_int;
             (*image)[i][j+1]=G_int;
             (*image)[i][j+2]=B_int;
@@ -410,7 +431,7 @@ void SAVE(const char *file_name,const char* type,unsigned char **image,const int
     printf("Saved %s\n",file_name);
 }
 
-// This function closes the program.
+// This function closes the program and frees the memory.
 void EXIT(char ** input,unsigned char*** image,const int height){
     free(*input);
     free_pixels(height,image);
@@ -420,37 +441,45 @@ void EXIT(char ** input,unsigned char*** image,const int height){
 // This functions checks if an valid command has been received
 // and,if true, executes the corresponding function
 void check_command(int command_value, int *width,  int *height, int *image_status,
-int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* color_image, char *type,int* my_image_max)
+int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* color_image, char *type,int* my_image_max,int* no_image_loaded)
 {
+    // Check for wrong command
     if(command_value ==  -1) {
-        char error_input[100];
+        char* error_input = (char*) malloc(100*sizeof(char));
         fgets(error_input,100,stdin);
         error_input[strlen(error_input)-1]='\0';
         printf("Invalid command\n");
+        free(error_input);
         return;
-
     }
     
+    // Declare variables
     char *file_name= (char*) malloc(NAME_LENGTH_MAX*sizeof(char));
     int replace1=0,replace2=0,replace3=0,replace4=0, angle=0;
-    int no_image_loaded=0;
     int whole_map_selected=0;
+    int extra_case=0;
     
+    // If the command_value returned a number between 0-8
+    // then we can call the corresponding function
     switch(command_value) {
         
-        // LOAD
+        // FUNCTION: LOAD
         case 0:
-        
+            // Get file name
             scanf("%s",file_name);
-            *image = LOAD(file_name,width,height,x1,y1,x2,y2,color_image,type,my_image_max);
+            
+            // Load the image in a dynamic matrix
+            *image = LOAD(file_name,width,height,x1,y1,x2,y2,color_image,type,my_image_max,no_image_loaded);
+
+            // Check image status
             if(*image != NULL)
                 *image_status=UPP;
 
             break;
 
-       // SELECT
+        // FUNCTION: SELECT
         case 1:
-                // SELECT WITH COORDINATES
+                // Get the coordinates given by select
                 if((scanf("%d %d %d %d",&replace1,&replace2,&replace3,&replace4)) == 4 ) {
                     if(*image_status == UPP)
                     {
@@ -462,26 +491,42 @@ int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* co
                     }
                     else  {
                         printf("No image loaded\n");
-                        no_image_loaded=1;
+                        *no_image_loaded=1;
                     }
                     
                 }
+                else {
+                    printf("Invalid set of coordinates\n");
+                    *no_image_loaded=1;
+                }
+
                 break;     
                 
-        // SELECT ALL
+        // FUNCTION: SELECT ALL
         case 2:   
-            SELECT_ALL(width,height,x1,y1,x2,y2);
+            if(*image_status == UPP)
+                SELECT_ALL(width,height,x1,y1,x2,y2);
+            else {
+                    printf("Invalid set of coordinates\n");
+                    *no_image_loaded=1;
+                }
             break;
 
-        // ROTATE    
+        // FUNCTION: ROTATE    
         case 3:
                if(scanf("%d",&angle)) {
+                   // If the image is loaded execute this. Else display "No image loaded"
                     if(*image_status == UPP) {
+                        
+                        //  Check for valid angle
                         if(angle != 90 && angle !=-90 && angle != 180 && angle !=-180 && angle !=270 && angle !=-270)
-                            {printf("Invalid parameters\n"); no_image_loaded=1;}
+                            {printf("Unsupported rotation angle\n"); *no_image_loaded=1;}
+                        
+                        // Check if the coordinates form a square image
                         else if( ( (*x2-*x1) != (*y2-*y1)) && (*x1!=0 || *y1 !=0 || *x2!=*height || *y2 !=*width))
-                            {printf("The selection must be square\n");no_image_loaded=1;}
+                            {printf("The selection must be square\n");*no_image_loaded=1;}
                         else {
+                            //  Check if the coordinates form the whole image
                             if(*x1==0 && *y1==0 && *x2== *height && *y2 == *width)
                                 whole_map_selected = 1;
                             ROTATE(angle, image,x1,y1,x2,y2,whole_map_selected,width,height);
@@ -489,25 +534,26 @@ int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* co
                         
                     } else  {
                         printf("No image loaded\n");
-                        no_image_loaded=1;
+                        *no_image_loaded=1;
                         }
                 }
                 break;
 
-        // CROP   
+        // FUNCTION: CROP   
         case 4:
                 if(*image_status == UPP)
                     CROP(x1,y1,x2,y2,width,height);
                 else  {
-                    printf("No image loaded\n");
-                    no_image_loaded=1;
+                    printf("No image cropped\n");
+                    *no_image_loaded=1;
                 }
 
                 break;
             
-        // GREYSCALE    
+        // FUNCTION: GREYSCALE    
         case 5:
            if(*image_status == UPP) {
+                // Apply GRAYSCALE filter only if the image is a color one
                 if(*color_image == 1)
                     GRAYSCALE(x1,y1,x2,y2,image);
                 else 
@@ -515,13 +561,14 @@ int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* co
            }     
             else  {
                 printf("No image loaded\n");
-                no_image_loaded=1;
+                *no_image_loaded=1;
             }
                 break;
 
-        // SEPIA    
+        // FUNCTION: SEPIA    
         case 6:
             if(*image_status == UPP) {
+                // Apply SEPIA filter only if the image is a color one
                 if(*color_image == 1)
                     SEPIA(x1,y1,x2,y2,image,*my_image_max);
                 else 
@@ -529,28 +576,28 @@ int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* co
            }     
             else  {
                 printf("No image loaded\n");
-                no_image_loaded=1;
+                *no_image_loaded=1;
             }
                 break;
             
-        // SAVE    
+        // FUNCTION: SAVE    
         case 7:
             if(*image_status == UPP)
                 SAVE(file_name,type,*image,*width,*height);
             else  {
                 printf("No image loaded\n");
-                no_image_loaded=1;
+                *no_image_loaded=1;
             }
             break;
 
-        // EXIT 
+        // FUNCTION: EXIT 
         case 8:
                 EXIT(input,image,*height);
                 break;
 
-        // INVALID COMMAND
+        // NO FUNCTION: "INVALID COMMAND"
         default:
-            if(no_image_loaded==1)
+            if(*no_image_loaded==1)
                 printf("Invalid command\n");
             break;
         
