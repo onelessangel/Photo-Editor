@@ -16,6 +16,10 @@ int find_command_value(const char**, const char*);
 // and copies the pixels from the file in a matrix shape.
 unsigned char** read_pixels(const int, const int, FILE*);
 
+// This functions allocates the memory for the image pixels
+// and saves the pixels in a matrix shape, reading from an BINARY file
+unsigned char** read_pixels_binary(const int, const int, FILE*);
+
 // This functions frees the memory from the currently loaded image.
 void free_pixels(const int, unsigned char***);
 
