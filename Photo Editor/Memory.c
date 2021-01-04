@@ -27,6 +27,7 @@ char* user_input(void) {
 // and returns -1 if it doesn't exist
 int find_command_value(const char *commands[], char* input)
 {
+    // Check if command is in list
     int command_value=-1;
     for(int i=0;i<DEFINED_COMMANDS;i++) 
         if(strcmp(commands[i],input)==0) {
@@ -34,8 +35,9 @@ int find_command_value(const char *commands[], char* input)
             break;
         }
     char a=0,b=0,c=0,d=0;
-    char wrong_input[100];
+    char* wrong_input = (char*) malloc(100*sizeof(char));
 
+    // Check for particular cases e.g.: SELECT ALL or extra input
     if(command_value==1)  {
         scanf("%c%c%c%c",&a,&b,&c,&d);
         if(a!=' ' || b!='A' || c!='L' || d != 'L') {
@@ -56,21 +58,20 @@ int find_command_value(const char *commands[], char* input)
         }
     }
         
-
+    free(wrong_input);
     return command_value;
 }
 
 // This functions allocates the memory for the image pixels
-// and saves the pixels in a matrix shape
+// and saves the pixels in a matrix shape, reading from an ASCII file
 unsigned char** read_pixels(const int my_image_width,const int my_image_height, FILE* file) {
 
+    // Allocate memory
     unsigned char** pixel_matrix = (unsigned char**) malloc(my_image_width * sizeof(unsigned char*));
-
-    for(int i=0;i<my_image_height;i++) pixel_matrix[i] = (unsigned char*) malloc(my_image_height * sizeof(unsigned char));
-
     for(int i=0;i<my_image_height;i++) 
-        pixel_matrix[i] = malloc(my_image_width * sizeof(unsigned char));
+        pixel_matrix[i] = (unsigned char*) malloc(my_image_width * sizeof(unsigned char));
     
+    // Scan values from ASCII file
     for(int i=0;i<my_image_height;i++) 
         for(int j=0;j<my_image_width;j++) 
             fscanf(file,"%hhu",&pixel_matrix[i][j]);
@@ -78,13 +79,31 @@ unsigned char** read_pixels(const int my_image_width,const int my_image_height, 
     return pixel_matrix; 
 }
 
+// This functions allocates the memory for the image pixels
+// and saves the pixels in a matrix shape, reading from an BINARY file
+unsigned char** read_pixels_binary(const int my_image_width,const int my_image_height, FILE* file) {
+
+    // Allocate memory
+    unsigned char** pixel_matrix = (unsigned char**) malloc(my_image_width * sizeof(unsigned char*));
+    for(int i=0;i<my_image_height;i++) 
+        pixel_matrix[i] = (unsigned char*) malloc(my_image_height * sizeof(unsigned char));
+
+    // Scan values from BINARY file
+    for(int i=0;i<my_image_height;i++) 
+        for(int j=0;j<my_image_width;j++) 
+            fread(&pixel_matrix[i][j],sizeof(unsigned char),1,file);
+
+    return pixel_matrix; 
+}
+
 // This functions creates a copy of the current selection
 unsigned char** copy_pixels_selection(const int x1, const int y1, const int x2, const int y2, unsigned char*** image) {
 
-    // Memory allocation
+    // find the width and the height of the image
     int my_image_width=y2-y1;
     int my_image_height=x2-x1;
 
+    // Memory allocation
     unsigned char** pixel_matrix = (unsigned char**) malloc((my_image_width)* sizeof(unsigned char*));
     for(int i=0;i<my_image_height;i++) 
         pixel_matrix[i] = (unsigned char*) malloc((my_image_height) * sizeof(unsigned char));
@@ -100,9 +119,10 @@ unsigned char** copy_pixels_selection(const int x1, const int y1, const int x2, 
 // This functions frees the memory from the currently loaded image.
 void free_pixels(const int my_image_height,unsigned char*** pixel_matrix)
 {
-    
+    // Free every line
     for(int i=0;i<my_image_height;i++) 
             free((*pixel_matrix)[i]);
-
+    
+    // Free the main pointer
     free(*pixel_matrix);
 }
