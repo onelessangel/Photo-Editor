@@ -28,10 +28,8 @@ unsigned char** copy_pixels_selection(const int ,const int, const int ,const int
 
 // Image properties
 typedef struct {
-    int type;
     int width;
     int height;
-    int max_value;
 } image_t;
 
 // File status
