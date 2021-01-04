@@ -6,7 +6,8 @@
 #include "Memory.h"
 
 // This function loads the image from the file.
-unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, int* y1, int* x2, int* y2,int* color_image,char *type) {
+unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, int* y1, int* x2,
+ int* y2,int* color_image, char *type, int* my_image_max) {
     
     FILE *file = fopen(file_name,"rt");
     if(file==NULL) {
@@ -14,21 +15,23 @@ unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, in
         return (unsigned char**) ERR;
     }
 
-    char b,c;
-    fscanf(file,"%c",&b);
-    fscanf(file,"%c",&c);
+    char first_character,second_character;
+    fscanf(file,"%c",&first_character);
+    fscanf(file,"%c",&second_character);
     image_t my_image;
 
-    if(c=='2') {
-        // DO STUFF WITH GRAYSCALE - ASCII
-        
-        fscanf(file,"%d %d %d",&my_image.width,&my_image.height,&my_image.max_value);
-      
+    // Check for text files
+    if(second_character=='2') {
+
+        // GRAYSCALE - ASCII
+        fscanf(file,"%d %d %d",&my_image.width,&my_image.height,my_image_max);
+
+        // Copy image
         unsigned char** pixels = read_pixels(my_image.width,my_image.height,file); 
         if(pixels != NULL)
             printf("Loaded %s\n",file_name);
 
-        // COD SUPLIMENTAR
+        // Set new values for coordinates and dimensions, type and color
         *width = my_image.width;
         *height = my_image.height;
         *x1=0;
@@ -37,101 +40,121 @@ unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, in
         *y2=my_image.width;
         *color_image=0;
         *type='t';
+
+        // Close file
         if(fclose(file) == EOF)
             return (unsigned char**) FILE_CLOSE_ERROR;
 
         return pixels;
-    //free_pixels(my_image.height,&pixels);
-
     }
 
-    else if(c=='3') {
-        // DO STUFF WITH RGB ASCII
-    
-        fscanf(file,"%d %d %d",&my_image.width,&my_image.height,&my_image.max_value);
+    else if(second_character=='3') {
+
+        // RGB - ASCII
+        fscanf(file,"%d %d %d",&my_image.width,&my_image.height,my_image_max);
+
+        // Copy image
         unsigned char** pixels = read_pixels(my_image.width*3,my_image.height,file); 
         if(pixels != NULL)
             printf("Loaded %s\n",file_name);
 
-        // COD SUPLIMENTAR
-        *width = my_image.width*3;
+        // Set new values for coordinates and dimensions, type and color
+        *width = (my_image.width*3);
         *height = my_image.height;
-        *x1  = 0;
+        *x1=0;
         *y1=0;
         *x2=my_image.height;
-        *y2=my_image.width*3;
+        *y2=(my_image.width*3);
         *color_image=1;
         *type='t';
+
+        // Close file
         if(fclose(file) == EOF)
             return (unsigned char**) FILE_CLOSE_ERROR;
 
         return pixels;
 
-        //free_pixels(my_image.height,&pixels);
+    }
 
-     }
-
+    // Check for binary files
     else {
         *type='b';
-        ungetc(b,file);
-        ungetc(c,file);
+        
+        // Put the read characters back into the file
+        ungetc(first_character,file);
+        ungetc(second_character,file);
 
+        // Close the file opened as text
         if(fclose(file) == EOF)
             return (unsigned char**) FILE_CLOSE_ERROR;
 
+        // Open the same file, but as binary
         FILE *file_bin = fopen(file_name,"rb");
-        if(file_bin==NULL) 
-            return (unsigned char**) FILE_OPEN_ERROR;
+    
+        // Get the type of file and the image restrictions
+        char file_type2[2];
+        int my_width,my_height;  
+        fscanf(file_bin,"%s",file_type2);
+        fscanf(file_bin,"%d",&my_width);
+        fscanf(file_bin,"%d",&my_height);
+        fscanf(file_bin,"%d",my_image_max);
+
+        // Decide which file type it is
+        if(strcmp("P5",file_type2)==0) 
+            second_character='G';
+        else second_character = 'R';
         
-
-        for(int i=0;i<5;i++) 
-            fread(&c,sizeof(char),1,file_bin);
-
+        // Remove the newline
         getc(file_bin);
 
-        if(c=='3') {
-            // DO STUFF WITH PGM - BINARY
-            // READ SIZE
-            // ALLOC SIZE
-            // FREE SIZE
-            // P5 - > *color_image=0;
-         //  if(pixels != NULL)
-        //    printf("Loaded %s\n",file_name);
-            // unsigned char a,b,c;
-            // fread(&a,sizeof(unsigned char),1,file_bin);
-            // fread(&b,sizeof(unsigned char),1,file_bin);
-            // fread(&c,sizeof(unsigned char),1,file_bin);
+        // Binary GRAYSCALE
+        if(second_character=='G') {
+        
+            // Read the image
+            unsigned char** pixels = read_pixels_binary(my_width,my_height,file_bin); 
+            if(pixels != NULL)
+                printf("Loaded %s\n",file_name);
 
-            // printf("%hhu %hhu %hhu",a,b,c);
-        //unsigned char** pixels = read_pixels(my_image.width,my_image.height,file); 
-      //  if(pixels != NULL)
-        //    printf("Loaded %s\n",file_name);
+            // Modify the dimensions
+            *width = my_width;
+            *height = my_height;
+            *x1=0;
+            *y1=0;
+            *x2=my_height;
+            *y2=my_width;
+            *color_image=0;
+            *type='b';
 
-        // COD SUPLIMENTAR
-//*color_image=0;
-      //  free_pixels(my_image.height,&pixels);
-        //*width = my_image.width;
-       // *height = my_image.height;
+            // Close the file
             if(fclose(file_bin) == EOF)
-               return (unsigned char**) FILE_CLOSE_ERROR;
-
-            return (unsigned char**)SUCC;
+                return (unsigned char**) FILE_CLOSE_ERROR;
+            
+            return pixels;
         }
-        else if(c=='4') {
-        //    if(pixels != NULL)
-        //      printf("Loaded %s\n",file_name);
-            // DO STUFF WITH PPM - BINARY
-            // READ SIZE
-            // ALLOC SIZE
-            // FREE SIZE
-            // P6 ->// P5 - > *color_image=0;
-//*color_image=1;
-   // *width = my_image.width;
-      //  *height = my_image.height;
-            if(fclose(file_bin) == EOF)
-               return (unsigned char**) FILE_CLOSE_ERROR;
+        
+        // Binary RGB
+        else if(second_character=='R') {
+            
+            // Read the image
+            unsigned char** pixels = read_pixels_binary(my_width*3,my_height,file_bin); 
+            if(pixels != NULL)
+                printf("Loaded %s\n",file_name);
+            
+            // Modify the dimensions
+            *width = my_width*3;
+            *height = my_height;
+            *x1=0;
+            *y1=0;
+            *x2=my_height;
+            *y2=my_width*3;
+            *color_image=1;
+            *type='b';
 
-            return (unsigned char**) SUCC;
+            // Close the file
+            if(fclose(file_bin) == EOF)
+                return (unsigned char**) FILE_CLOSE_ERROR;
+
+            return pixels;
         }
     }
 
@@ -142,6 +165,7 @@ unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, in
 // This function selects a part of the area.
 void SELECT(int* x1, int* y1, int* x2, int* y2, int *width, int *height){
 
+        // Chech if the coordinates are valid
         if(*x1<0 || *x2 < 0 || *y1 < 0 || *y2 < 0) 
             printf("Invalid coordinates\n");
         else if(*x1> *height || *x2 > *height)
@@ -151,6 +175,7 @@ void SELECT(int* x1, int* y1, int* x2, int* y2, int *width, int *height){
         else
             printf("Selected %d %d %d %d\n",*x1,*y1,*x2,*y2);
 
+        // Keep the width and height coordinates in ascending order
         int aux;
         if(*x1>*x2) {
             aux = *x1;
@@ -167,6 +192,7 @@ void SELECT(int* x1, int* y1, int* x2, int* y2, int *width, int *height){
 
 // This function selects the whole area.
 void SELECT_ALL(int *width, int *height, int *x1, int *y1, int *x2, int *y2){
+
         *x1=0;
         *y1=0;
         *x2=*height;
@@ -178,6 +204,7 @@ void SELECT_ALL(int *width, int *height, int *x1, int *y1, int *x2, int *y2){
 // This function rotates the image by a certain angle.
 void ROTATE(int angle, unsigned char*** image, int *x1, int *y1, int *x2, int *y2, const int whole_map_selected, int *width, int *height) {
     
+    // Case one: only a part of the image is selected (a square submatrix)
     if(!whole_map_selected) {
 
         // Create copy of the current selection
@@ -185,38 +212,47 @@ void ROTATE(int angle, unsigned char*** image, int *x1, int *y1, int *x2, int *y
         if( pixels == NULL) 
             return;
 
+        // Rotate to 90/-270 degrees
         if(angle == 90 || angle == -270) {
             for(int i=0;i<(*x2-*x1);i++) 
                 for(int j=0;j<(*y2-*y1);j++) 
                     (*image)[*x1+i][*y1+j]=pixels[*x2-1-j][*y1+i];
         }
+
+        // Rotate to 180/-180 degrees
         else if(angle == 180 || angle == -180) {
             for(int i=0;i<(*x2-*x1);i++) 
                 for(int j=0;j<(*y2-*y1);j++) 
                     (*image)[*x1+i][*y1+j]=pixels[*x2-1-i][*y2-1-j];
         } 
+
+        // Rotate to 270/-90 degrees
         else if(angle == 270 || angle == -90) {
             for(int i=0;i<(*x2-*x1);i++) 
                 for(int j=0;j<(*y2-*y1);j++) 
                     (*image)[*x2-1-j][*y1+i]=pixels[*x1+i][*y1+j];
         }  
+        
+        // Free the matrix copy
         free_pixels((*x2-*x1),&pixels);
     }
 
+    // Case two: the whole map is selected (it might not be a sqaure matrix)
     else if(whole_map_selected) {
 
+        // Rotate to 90/-270 degrees
         if(angle == 90 || angle == -270) {
             
-            // Memory allocation
+            // Get the minimum square matrix necessary
             int max_size = *height;
             if (max_size < *width) max_size = *width;
 
+            // Memory allocation for rotation
             unsigned char** pixel_matrix = (unsigned char**) calloc(max_size, sizeof(unsigned char*));
-
             for(int i=0;i<max_size;i++) 
                 pixel_matrix[i] = (unsigned char*) calloc(max_size, sizeof(unsigned char));
 
-            // Copy values
+            // Copy values in the clone matrix
             int p=0;
             for(int i=0;i<*width;i++) {
                 for(int j=0;j<*height;j++) {
@@ -226,6 +262,7 @@ void ROTATE(int angle, unsigned char*** image, int *x1, int *y1, int *x2, int *y
             
             }
 
+            // Save and change coordinates accordingly
             *image=pixel_matrix;
             int aux = *width;
             *width=*height;
@@ -235,40 +272,49 @@ void ROTATE(int angle, unsigned char*** image, int *x1, int *y1, int *x2, int *y
 
         }
 
+        // Rotate to 180/-180 degrees
         else if(angle == 180 || angle == -180) {
-            // Memory allocation
-            unsigned char** pixel_matrix = (unsigned char**) malloc(*width * sizeof(unsigned char*));
 
-            for(int i=0;i<*width;i++) 
-                pixel_matrix[i] = (unsigned char*) malloc(*height * sizeof(unsigned char));
+            // Get the minimum square matrix necessary
+            int max_size = *height;
+            if (max_size < *width) max_size = *width;
 
-            // Copy values
+            // Memory allocation for rotation
+            unsigned char** pixel_matrix = (unsigned char**) malloc(max_size * sizeof(unsigned char*));
+            for(int i=0;i<max_size;i++) 
+                pixel_matrix[i] = (unsigned char*) malloc(max_size * sizeof(unsigned char));
+            
+            // Copy values in the matrix copy
             for(int i=0;i<*height;i++) {
                 for(int j=0;j<*width;j++) {
                     pixel_matrix[i][j]=(*image)[i][j];
                 }
             }
-
+      
+            // Put the correct values in the original matrix
             for(int i=0;i<*height;i++) {
                 for(int j=0;j<*width;j++) {
-                (*image)[i][j]=pixel_matrix[*height-1-i][*width-1-j];
-
+                    (*image)[i][j]=pixel_matrix[*height-1-i][*width-1-j];
                 }
             }
 
+            // Free the matrix copy
+            free_pixels(max_size -1,&pixel_matrix);
         } 
 
+        // Rotate to 270/-90 degrees
         else if(angle == 270 || angle == -90) {
-            // Memory allocation
+         
+            // Get the minimum square matrix necessary
             int max_size = *height;
             if (max_size < *width) max_size = *width;
 
+            // Memory allocation for rotation
             unsigned char** pixel_matrix = (unsigned char**) calloc(max_size, sizeof(unsigned char*));
-
             for(int i=0;i<max_size;i++) 
                 pixel_matrix[i] = (unsigned char*) calloc(max_size, sizeof(unsigned char));
 
-            // Copy values
+            // Copy values in the matrix copy
             for(int i=0;i<*width;i++) {
                 for(int j=0;j<*height;j++) {
                     pixel_matrix[i][j]=(*image)[j][*width-1-i];
@@ -276,6 +322,7 @@ void ROTATE(int angle, unsigned char*** image, int *x1, int *y1, int *x2, int *y
             
             }
 
+            // Put the correct values in the original matrix
             *image=pixel_matrix;
             int aux = *width;
             *width=*height;
@@ -308,24 +355,34 @@ void GRAYSCALE(int *x1,int *y1,int *x2,int *y2,unsigned char*** image) {
     printf("Grayscale filter applied\n");
 }
 
+// This functions returns the lowest value from the comparison of two values
+int minimum_value(int first_value, int second_value) {
+    if(first_value  > second_value) return second_value;
+    return first_value;
+}
+
 // This function will turn the image to sepia format.
-void SEPIA(int *x1,int *y1,int *x2,int *y2,unsigned char*** image){
-    int R,G,B;
+void SEPIA(int *x1,int *y1,int *x2,int *y2,unsigned char*** image, const int my_image_max){
+    double R,G,B;
+    int R_int, G_int,B_int;
     for(int i=*x1;i<*x2;i++)
         for(int j=*y1;j<*y2;j=j+3) {
 
             R=0.393*(*image)[i][j] + 0.769*(*image)[i][j+1] + 0.189* (*image)[i][j+2];
-            if(R>255) R = 255;
+            R_int = R;
+            if(R_int>my_image_max) R_int = minimum_value(R_int,my_image_max);
 
             G=0.349*(*image)[i][j] + 0.686*(*image)[i][j+1] + 0.168* (*image)[i][j+2];
-            if(G>255) G = 255;
+            G_int = G;
+            if(G_int>my_image_max) G_int = minimum_value(G_int,my_image_max);
 
             B=0.272*(*image)[i][j] + 0.534*(*image)[i][j+1] + 0.131* (*image)[i][j+2];
-            if(B>255) B = 255;
+            B_int = B;
+            if(B_int>my_image_max) B_int = minimum_value(B_int,my_image_max);
 
-            (*image)[i][j]=R;
-            (*image)[i][j+1]=G;
-            (*image)[i][j+2]=B;
+            (*image)[i][j]=R_int;
+            (*image)[i][j+1]=G_int;
+            (*image)[i][j+2]=B_int;
         }
     printf("Sepia filter applied\n");
 }
@@ -354,15 +411,16 @@ void SAVE(const char *file_name,const char* type,unsigned char **image,const int
 }
 
 // This function closes the program.
-void EXIT(char ** input){
+void EXIT(char ** input,unsigned char*** image,const int height){
     free(*input);
+    free_pixels(height,image);
     exit(EXIT_SUCCESS);
 }
   
 // This functions checks if an valid command has been received
 // and,if true, executes the corresponding function
 void check_command(int command_value, int *width,  int *height, int *image_status,
-int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* color_image, char *type)
+int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* color_image, char *type,int* my_image_max)
 {
     if(command_value ==  -1) {
         char error_input[100];
@@ -384,7 +442,7 @@ int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* co
         case 0:
         
             scanf("%s",file_name);
-            *image = LOAD(file_name,width,height,x1,y1,x2,y2,color_image,type);
+            *image = LOAD(file_name,width,height,x1,y1,x2,y2,color_image,type,my_image_max);
             if(*image != NULL)
                 *image_status=UPP;
 
@@ -465,7 +523,7 @@ int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* co
         case 6:
             if(*image_status == UPP) {
                 if(*color_image == 1)
-                    SEPIA(x1,y1,x2,y2,image);
+                    SEPIA(x1,y1,x2,y2,image,*my_image_max);
                 else 
                     printf("Sepia filter not available");        
            }     
@@ -487,7 +545,7 @@ int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* co
 
         // EXIT 
         case 8:
-                EXIT(input);
+                EXIT(input,image,*height);
                 break;
 
         // INVALID COMMAND
