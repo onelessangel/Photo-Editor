@@ -7,8 +7,9 @@
 
 // This function loads the image from the file
 // and keeps the width and the height.
-unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, int* y1, int* x2,
- int* y2,int* color_image, char *type, int* my_image_max,int* no_image_loaded) {
+unsigned char** LOAD(const char *file_name, int *width, int *height, 
+int* x1, int* y1, int* x2,int* y2,int* color_image, int* my_image_max,
+int* no_image_loaded, char* type) {
     
     FILE *file = fopen(file_name,"rt");
     if(file==NULL) {
@@ -25,7 +26,12 @@ unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, in
     if(second_character=='2') {
 
         // GRAYSCALE - ASCII
-        fscanf(file,"%d %d %d",&my_image.width,&my_image.height,my_image_max);
+        int val1,val2,val3;
+        fscanf(file,"%d %d %d",&val1,&val2,&val3);
+      
+        my_image.width=val1;
+        my_image.height=val2;
+        *my_image_max=val3;
 
         // Copy image
         unsigned char** pixels = NULL;
@@ -34,7 +40,7 @@ unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, in
             printf("Loaded %s\n",file_name);
             *no_image_loaded = 0;}
 
-        // Set new values for coordinates and dimensions, type and color
+        // Set new values for coordinates, dimensions and color
         *width = my_image.width;
         *height = my_image.height;
         *x1=0;
@@ -42,7 +48,7 @@ unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, in
         *x2=my_image.height;
         *y2=my_image.width;
         *color_image=0;
-        *type='t';
+        *type='2';
 
         // Close file
         if(fclose(file) == EOF)
@@ -54,7 +60,12 @@ unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, in
     else if(second_character=='3') {
 
         // RGB - ASCII
-        fscanf(file,"%d %d %d",&my_image.width,&my_image.height,my_image_max);
+        int val1,val2,val3;
+        fscanf(file,"%d %d %d",&val1,&val2,&val3);
+      
+        my_image.width=val1;
+        my_image.height=val2;
+        *my_image_max=val3;
 
         // Copy image
         unsigned char** pixels = NULL;
@@ -64,7 +75,7 @@ unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, in
             *no_image_loaded=0;
         }
 
-        // Set new values for coordinates and dimensions, type and color
+        // Set new values for coordinates, dimensions and color
         *width = (my_image.width*3);
         *height = my_image.height;
         *x1=0;
@@ -72,8 +83,7 @@ unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, in
         *x2=my_image.height;
         *y2=(my_image.width*3);
         *color_image=1;
-        *type='t';
-
+        *type='3';
         // Close file
         if(fclose(file) == EOF)
             return (unsigned char**) FILE_CLOSE_ERROR;
@@ -84,7 +94,6 @@ unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, in
 
     // Check for binary files
     else {
-        *type='b';
         
         // Put the read characters back into the file
         ungetc(first_character,file);
@@ -132,8 +141,7 @@ unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, in
             *x2=my_height;
             *y2=my_width;
             *color_image=0;
-            *type='b';
-
+            *type='5';
             // Close the file
             if(fclose(file_bin) == EOF)
                 return (unsigned char**) FILE_CLOSE_ERROR;
@@ -160,7 +168,7 @@ unsigned char** LOAD(const char *file_name, int *width, int *height, int* x1, in
             *x2=my_height;
             *y2=my_width*3;
             *color_image=1;
-            *type='b';
+            *type='6';
 
             // Close the file
             if(fclose(file_bin) == EOF)
@@ -409,24 +417,86 @@ void SEPIA(int *x1,int *y1,int *x2,int *y2,unsigned char*** image, const int my_
 }
 
 // This function saves the current image to a file in the specified format.
-void SAVE(const char *file_name,const char* type,unsigned char **image,const int width, const int height) {
+void SAVE(const char *file_name,unsigned char **image,int width, const int height, const int binary,const char type, int my_image_max) {
 
     FILE *new_file;
-    if(*type == 'b')
+    
+    // Open in binary mode
+    if(binary == 1) {
         new_file=fopen(file_name,"wb");
-    else if(*type == 't')
-        new_file=fopen(file_name,"wt");
-    
-    if(new_file == NULL)
-        return;
-    
-    for(int i=0;i<height;i++) {
-        for(int j=0;j<width;j++)  fprintf(new_file,"%hhu ",image[i][j]);
-        fprintf(new_file,"\n");
-    }
-
-    if(fclose(new_file) == EOF)
+        if(new_file == NULL)
             return;
+
+        if(type=='5') {
+            char Px[2]="P5";
+            fwrite(Px,sizeof(char),2,new_file);
+            fwrite(&width,sizeof(int),1,new_file);
+            fwrite(&height,sizeof(int),1,new_file);
+            fwrite(&my_image_max,sizeof(int),1,new_file);
+            for(int i=0;i<height;i++)
+                for(int j=0;j<width;j++)
+                    fwrite(&image[i][j],sizeof(unsigned char),1,new_file);
+
+          if(fclose(new_file)== EOF) {
+              printf("Nu s-a inchis");
+                return;
+            }
+        }
+        else if(type=='6') {
+            width=width/3;
+            char Px[2]="P6";
+            fwrite(Px,sizeof(char),2,new_file);
+            fwrite(&width,sizeof(int),1,new_file);
+            fwrite(&height,sizeof(int),1,new_file);
+            fwrite(&my_image_max,sizeof(int),1,new_file);
+            for(int i=0;i<height;i++)
+                for(int j=0;j<width;j++)
+                    fwrite(&image[i][j],sizeof(unsigned char),1,new_file);
+
+          if(fclose(new_file)== EOF) {printf("Nu s-a inchis");
+                return;
+            }
+
+        } 
+    }
+    // Open in ascii mode
+    else if(binary == 0) {
+        new_file=fopen(file_name,"wt");
+        if(new_file == NULL)
+            return;
+
+        if(type=='2') {
+            char Px[2]="P2";
+            fprintf(new_file,"%s\n",Px);
+            fprintf(new_file,"%d %d\n%d\n",width,height,my_image_max);
+     
+            for(int i=0;i<height;i++) {
+                for(int j=0;j<width;j++)  fprintf(new_file,"%hhu ",image[i][j]);
+                    fprintf(new_file,"\n");
+                }
+            
+              if(fclose(new_file)== EOF) {printf("Nu s-a inchis");
+                return;
+            }
+            
+    }
+        else if(type=='3') {
+            char Px[2]="P3";
+            width=width/3;
+            fprintf(new_file,"%s\n",Px);
+            fprintf(new_file,"%d %d\n%d\n",width,height,my_image_max);
+     
+            for(int i=0;i<height;i++) {
+                for(int j=0;j<width;j++)  fprintf(new_file,"%hhu ",image[i][j]);
+                    
+                }
+
+            if(fclose(new_file)== EOF) {printf("Nu s-a inchis");
+                return;
+            }
+
+        }
+    }
 
     printf("Saved %s\n",file_name);
 }
@@ -441,7 +511,8 @@ void EXIT(char ** input,unsigned char*** image,const int height){
 // This functions checks if an valid command has been received
 // and,if true, executes the corresponding function
 void check_command(int command_value, int *width,  int *height, int *image_status,
-int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* color_image, char *type,int* my_image_max,int* no_image_loaded)
+int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* color_image,
+char* type, int* my_image_max,int* no_image_loaded)
 {
     // Check for wrong command
     if(command_value ==  -1) {
@@ -457,7 +528,9 @@ int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* co
     char *file_name= (char*) malloc(NAME_LENGTH_MAX*sizeof(char));
     int replace1=0,replace2=0,replace3=0,replace4=0, angle=0;
     int whole_map_selected=0;
-    int extra_case=0;
+    char* input_save = (char*) malloc(100*sizeof(char));
+    char* word, binary=0;
+    char* new_file = (char*) malloc(100*sizeof(int));
     
     // If the command_value returned a number between 0-8
     // then we can call the corresponding function
@@ -469,7 +542,7 @@ int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* co
             scanf("%s",file_name);
             
             // Load the image in a dynamic matrix
-            *image = LOAD(file_name,width,height,x1,y1,x2,y2,color_image,type,my_image_max,no_image_loaded);
+            *image = LOAD(file_name,width,height,x1,y1,x2,y2,color_image,my_image_max,no_image_loaded,type);
 
             // Check image status
             if(*image != NULL)
@@ -557,7 +630,7 @@ int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* co
                 if(*color_image == 1)
                     GRAYSCALE(x1,y1,x2,y2,image);
                 else 
-                    printf("Grayscale filter not available");      
+                    printf("Grayscale filter not available\n");      
            }     
             else  {
                 printf("No image loaded\n");
@@ -572,7 +645,7 @@ int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* co
                 if(*color_image == 1)
                     SEPIA(x1,y1,x2,y2,image,*my_image_max);
                 else 
-                    printf("Sepia filter not available");        
+                    printf("Sepia filter not available\n");        
            }     
             else  {
                 printf("No image loaded\n");
@@ -582,8 +655,19 @@ int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* co
             
         // FUNCTION: SAVE    
         case 7:
-            if(*image_status == UPP)
-                SAVE(file_name,type,*image,*width,*height);
+            getc(stdin);
+            fgets(input_save,100,stdin);
+            word = strtok(input_save," ");
+            strcpy(new_file,word);
+            word = strtok(NULL," ");
+            if ( word == NULL )
+                binary=1;
+            else binary=0;
+
+            if(*image_status == UPP) {
+                SAVE(new_file,*image,*width,*height,binary,*type,*my_image_max);
+                printf("Am trimis %s %d %d %d %c %d",new_file,*width,*height,binary,*type,*my_image_max);
+            }
             else  {
                 printf("No image loaded\n");
                 *no_image_loaded=1;
