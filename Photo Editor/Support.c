@@ -222,7 +222,8 @@ void SELECT_ALL(int *width, int *height, int *x1, int *y1, int *x2, int *y2){
 }
 
 // This function rotates the image or a selection of pixels from the image by a certain angle.
-void ROTATE(int angle, unsigned char*** image, int *x1, int *y1, int *x2, int *y2, const int whole_map_selected, int *width, int *height) {
+void ROTATE(int angle, unsigned char*** image, int *x1, int *y1, int *x2, int *y2, const int whole_map_selected, int *width,
+ int *height,const int color_image) {
     
     // Case one: only a part of the image is selected (a square submatrix)
     if(!whole_map_selected) {
@@ -231,38 +232,66 @@ void ROTATE(int angle, unsigned char*** image, int *x1, int *y1, int *x2, int *y
         unsigned char** pixels = copy_pixels_selection(*x1,*y1,*x2,*y2,image); 
         if( pixels == NULL) 
             return;
+        if(color_image==0) {
 
-        // Rotate to 90/-270 degrees
-        if(angle == 90 || angle == -270) {
-            for(int i=0;i<(*x2-*x1);i++) 
-                for(int j=0;j<(*y2-*y1);j++) 
-                    (*image)[*x1+i][*y1+j]=pixels[*x2-1-j][*y1+i];
+            // Rotate to 90/-270 degrees
+            if(angle == 90 || angle == -270) {
+                for(int i=0;i<(*x2-*x1);i++) 
+                    for(int j=0;j<(*y2-*y1);j++) 
+                        (*image)[*x1+i][*y1+j]=pixels[*x2-1-j][*y1+i];
+            }
+
+            // Rotate to 180/-180 degrees
+            else if(angle == 180 || angle == -180) {
+                for(int i=0;i<(*x2-*x1);i++) 
+                    for(int j=0;j<(*y2-*y1);j++) 
+                        (*image)[*x1+i][*y1+j]=pixels[*x2-1-i][*y2-1-j];
+            } 
+
+            // Rotate to 270/-90 degrees
+            else if(angle == 270 || angle == -90) {
+                for(int i=0;i<(*x2-*x1);i++) 
+                    for(int j=0;j<(*y2-*y1);j++) 
+                        (*image)[*x2-1-j][*y1+i]=pixels[*x1+i][*y1+j];
+            }  
+            
+            // Free the matrix copy
+            free_pixels((*x2-*x1),&pixels);
+            }  
+
+        else if(color_image==1) {
+
+            TO DO FOR RGB
+            // Rotate to 90/-270 degrees
+            if(angle == 90 || angle == -270) {
+                for(int i=0;i<(*x2-*x1);i++) 
+                    for(int j=0;j<(*y2-*y1);j++) 
+                        (*image)[*x1+i][*y1+j]=pixels[*x2-1-j][*y1+i];
+            }
+
+            // Rotate to 180/-180 degrees
+            else if(angle == 180 || angle == -180) {
+                for(int i=0;i<(*x2-*x1);i++) 
+                    for(int j=0;j<(*y2-*y1);j++) 
+                        (*image)[*x1+i][*y1+j]=pixels[*x2-1-i][*y2-1-j];
+            } 
+
+            // Rotate to 270/-90 degrees
+            else if(angle == 270 || angle == -90) {
+                for(int i=0;i<(*x2-*x1);i++) 
+                    for(int j=0;j<(*y2-*y1);j++) 
+                        (*image)[*x2-1-j][*y1+i]=pixels[*x1+i][*y1+j];
+            }    
         }
+    }    
 
-        // Rotate to 180/-180 degrees
-        else if(angle == 180 || angle == -180) {
-            for(int i=0;i<(*x2-*x1);i++) 
-                for(int j=0;j<(*y2-*y1);j++) 
-                    (*image)[*x1+i][*y1+j]=pixels[*x2-1-i][*y2-1-j];
-        } 
-
-        // Rotate to 270/-90 degrees
-        else if(angle == 270 || angle == -90) {
-            for(int i=0;i<(*x2-*x1);i++) 
-                for(int j=0;j<(*y2-*y1);j++) 
-                    (*image)[*x2-1-j][*y1+i]=pixels[*x1+i][*y1+j];
-        }  
-        
-        // Free the matrix copy
-        free_pixels((*x2-*x1),&pixels);
-    }
-
-    // Case two: the whole map is selected (it might not be a sqaure matrix)
+    // Case two: the whole map is selected (it might not be a square matrix)
     else if(whole_map_selected) {
 
         // Rotate to 90/-270 degrees
         if(angle == 90 || angle == -270) {
-            
+            if(color_image==0) {
+
             // Get the minimum square matrix necessary
             int max_size = *height;
             if (max_size < *width) max_size = *width;
@@ -290,66 +319,187 @@ void ROTATE(int angle, unsigned char*** image, int *x1, int *y1, int *x2, int *y
             *x2=*height;
             *y2=*width;
 
+            }
+            else if(color_image == 1) {
+
+                // Get the minimum square matrix necessary
+                int new_height = *width/3;
+                int new_width= *height*3;
+                int max_size = new_height;
+                if (max_size < new_width) max_size = new_width;
+
+                // Memory allocation for rotation
+                unsigned char** pixel_matrix = (unsigned char**) calloc(max_size, sizeof(unsigned char*));
+                for(int i=0;i<max_size;i++) 
+                    pixel_matrix[i] = (unsigned char*) calloc(max_size, sizeof(unsigned char));
+
+                // Copy values in the clone matrix 
+                int p=*height-1, k=0, keep_pos=0;
+
+                for(int i=0;i<new_height;i++) {
+                    p=*height-1;
+                    k=keep_pos;
+
+                    for(int j=0;j<new_width;j++) {
+                        pixel_matrix[i][j] = (*image)[p][k]; 
+                        k++;
+                       
+                       if(k==(keep_pos+3)) {
+                           p--;
+                           k=keep_pos;
+                       }
+                    }
+                    keep_pos+=3;
+                }
+               
+                // Save and change coordinates accordingly
+                *image=pixel_matrix;
+                *width=new_width;
+                *height=new_height;
+                *x2=*height;
+                *y2=*width;
+
+            }
         }
 
         // Rotate to 180/-180 degrees
         else if(angle == 180 || angle == -180) {
+            if(color_image==0) {
+                // Get the minimum square matrix necessary
+                int max_size = *height;
+                if (max_size < *width) max_size = *width;
 
-            // Get the minimum square matrix necessary
-            int max_size = *height;
-            if (max_size < *width) max_size = *width;
-
-            // Memory allocation for rotation
-            unsigned char** pixel_matrix = (unsigned char**) malloc(max_size * sizeof(unsigned char*));
-            for(int i=0;i<max_size;i++) 
-                pixel_matrix[i] = (unsigned char*) malloc(max_size * sizeof(unsigned char));
-            
-            // Copy values in the matrix copy
-            for(int i=0;i<*height;i++) {
-                for(int j=0;j<*width;j++) {
-                    pixel_matrix[i][j]=(*image)[i][j];
+                // Memory allocation for rotation
+                unsigned char** pixel_matrix = (unsigned char**) malloc(max_size * sizeof(unsigned char*));
+                for(int i=0;i<max_size;i++) 
+                    pixel_matrix[i] = (unsigned char*) malloc(max_size * sizeof(unsigned char));
+                
+                // Copy values in the matrix copy
+                for(int i=0;i<*height;i++) {
+                    for(int j=0;j<*width;j++) {
+                        pixel_matrix[i][j]=(*image)[i][j];
+                    }
                 }
-            }
-      
-            // Put the correct values in the original matrix
-            for(int i=0;i<*height;i++) {
-                for(int j=0;j<*width;j++) {
-                    (*image)[i][j]=pixel_matrix[*height-1-i][*width-1-j];
+        
+                // Put the correct values in the original matrix
+                for(int i=0;i<*height;i++) {
+                    for(int j=0;j<*width;j++) {
+                        (*image)[i][j]=pixel_matrix[*height-1-i][*width-1-j];
+                    }
                 }
-            }
 
-            // Free the matrix copy
-            free_pixels(max_size,&pixel_matrix);
-        } 
+                // Free the matrix copy
+                free_pixels(max_size,&pixel_matrix);
+            } 
+        
+            else if(color_image == 1) {
+                // Get the minimum square matrix necessary
+                int max_size = *height;
+                if (max_size < *width) max_size = *width;
+
+                // Memory allocation for rotation
+                unsigned char** pixel_matrix = (unsigned char**) malloc(max_size * sizeof(unsigned char*));
+                for(int i=0;i<max_size;i++) 
+                    pixel_matrix[i] = (unsigned char*) malloc(max_size * sizeof(unsigned char));
+                
+                // Copy values in the matrix copy
+                for(int i=0;i<*height;i++) {
+                    for(int j=0;j<*width;j++) {
+                        pixel_matrix[i][j]=(*image)[i][j];
+                    }
+                }
+        
+                // Put the correct values in the original matrix
+                int p = *height-1;
+                int k = *width-3;
+                int limit = *width;
+                for(int i=0;i<*height;i++) {
+                    for(int j=0;j<*width;j++) {
+                        (*image)[i][j]=pixel_matrix[p][k];
+                        k++;
+                        if(k==limit) {
+                            k=k-6;
+                            limit-=3;
+                        }
+                        
+                    }
+                    p--;
+                    k = *width-3;
+                    limit = *width;
+                }
+
+                // Free the matrix copy
+                free_pixels(max_size,&pixel_matrix);
+            } 
+        }
 
         // Rotate to 270/-90 degrees
         else if(angle == 270 || angle == -90) {
-         
-            // Get the minimum square matrix necessary
-            int max_size = *height;
-            if (max_size < *width) max_size = *width;
 
-            // Memory allocation for rotation
-            unsigned char** pixel_matrix = (unsigned char**) calloc(max_size, sizeof(unsigned char*));
-            for(int i=0;i<max_size;i++) 
-                pixel_matrix[i] = (unsigned char*) calloc(max_size, sizeof(unsigned char));
+            if(color_image==0) {
+                // Get the minimum square matrix necessary
+                int max_size = *height;
+                if (max_size < *width) max_size = *width;
 
-            // Copy values in the matrix copy
-            for(int i=0;i<*width;i++) {
-                for(int j=0;j<*height;j++) {
-                    pixel_matrix[i][j]=(*image)[j][*width-1-i];
+                // Memory allocation for rotation
+                unsigned char** pixel_matrix = (unsigned char**) calloc(max_size, sizeof(unsigned char*));
+                for(int i=0;i<max_size;i++) 
+                    pixel_matrix[i] = (unsigned char*) calloc(max_size, sizeof(unsigned char));
+
+                // Copy values in the matrix copy
+                for(int i=0;i<*width;i++) {
+                    for(int j=0;j<*height;j++) {
+                        pixel_matrix[i][j]=(*image)[j][*width-1-i];
+                    }
+                
                 }
-            
+
+                // Put the correct values in the original matrix
+                *image=pixel_matrix;
+                int aux = *width;
+                *width=*height;
+                *height=aux;
+                *x2=*height;
+                *y2=*width;
+
             }
+            else if(color_image==1) {
+                // Get the minimum square matrix necessary
+                int new_height = *width/3;
+                int new_width= *height*3;
+                int max_size = new_height;
+                if (max_size < new_width) max_size = new_width;
 
-            // Put the correct values in the original matrix
-            *image=pixel_matrix;
-            int aux = *width;
-            *width=*height;
-            *height=aux;
-            *x2=*height;
-            *y2=*width;
+                // Memory allocation for rotation
+                unsigned char** pixel_matrix = (unsigned char**) calloc(max_size, sizeof(unsigned char*));
+                for(int i=0;i<max_size;i++) 
+                    pixel_matrix[i] = (unsigned char*) calloc(max_size, sizeof(unsigned char));
 
+                // Copy values in the clone matrix 
+                int p=0, k=0, keep_pos=0;
+                for(int i=new_height-1;i>=0;i--) {
+                    k=keep_pos;
+                    p=0;
+                    for(int j=0;j<new_width;j++) {
+                        pixel_matrix[i][j]=(*image)[p][k];
+                        k++;
+                        if(k==(keep_pos+3)) {
+                            p++;
+                            k=keep_pos;
+                        }
+                        
+                    }
+                    keep_pos+=3;
+                }
+               
+                // Save and change coordinates accordingly
+                *image=pixel_matrix;
+                *width=new_width;
+                *height=new_height;
+                *x2=*height;
+                *y2=*width;
+
+            }
         }
     }
 
@@ -438,7 +588,6 @@ void SAVE(const char *file_name,unsigned char **image,int width, const int heigh
                     fwrite(&image[i][j],sizeof(unsigned char),1,new_file);
 
           if(fclose(new_file)== EOF) {
-              printf("Nu s-a inchis");
                 return;
             }
         }
@@ -450,10 +599,10 @@ void SAVE(const char *file_name,unsigned char **image,int width, const int heigh
             fwrite(&height,sizeof(int),1,new_file);
             fwrite(&my_image_max,sizeof(int),1,new_file);
             for(int i=0;i<height;i++)
-                for(int j=0;j<width;j++)
+                for(int j=0;j<width*3;j++)
                     fwrite(&image[i][j],sizeof(unsigned char),1,new_file);
 
-          if(fclose(new_file)== EOF) {printf("Nu s-a inchis");
+          if(fclose(new_file)== EOF) {
                 return;
             }
 
@@ -475,7 +624,7 @@ void SAVE(const char *file_name,unsigned char **image,int width, const int heigh
                     fprintf(new_file,"\n");
                 }
             
-              if(fclose(new_file)== EOF) {printf("Nu s-a inchis");
+              if(fclose(new_file)== EOF) {
                 return;
             }
             
@@ -487,11 +636,13 @@ void SAVE(const char *file_name,unsigned char **image,int width, const int heigh
             fprintf(new_file,"%d %d\n%d\n",width,height,my_image_max);
      
             for(int i=0;i<height;i++) {
-                for(int j=0;j<width;j++)  fprintf(new_file,"%hhu ",image[i][j]);
-                    
+                for(int j=0;j<width*3;j++)  fprintf(new_file,"%hhu ",image[i][j]);
+                    fprintf(new_file,"\n");
                 }
+            fseek(new_file,-1,SEEK_END);
+            getc(new_file);
 
-            if(fclose(new_file)== EOF) {printf("Nu s-a inchis");
+            if(fclose(new_file)== EOF) {
                 return;
             }
 
@@ -602,7 +753,7 @@ char* type, int* my_image_max,int* no_image_loaded)
                             //  Check if the coordinates form the whole image
                             if(*x1==0 && *y1==0 && *x2== *height && *y2 == *width)
                                 whole_map_selected = 1;
-                            ROTATE(angle, image,x1,y1,x2,y2,whole_map_selected,width,height);
+                            ROTATE(angle, image,x1,y1,x2,y2,whole_map_selected,width,height,*color_image);
                         }
                         
                     } else  {
@@ -666,7 +817,6 @@ char* type, int* my_image_max,int* no_image_loaded)
 
             if(*image_status == UPP) {
                 SAVE(new_file,*image,*width,*height,binary,*type,*my_image_max);
-                printf("Am trimis %s %d %d %d %c %d",new_file,*width,*height,binary,*type,*my_image_max);
             }
             else  {
                 printf("No image loaded\n");
