@@ -45,7 +45,8 @@ enum {
     TRUE=1,
     SUCC=2,
     ERR=3,
-    UPP=1
+    UPP=1,
+    MAX_COMMAND_SIZE=100
 };
 
 
