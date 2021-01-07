@@ -9,7 +9,7 @@
 // and keeps the width and the height.
 unsigned char** LOAD(const char *file_name, int *width, int *height, 
 int* x1, int* y1, int* x2,int* y2,int* color_image, int* my_image_max,
-int* no_image_loaded, char* type) {
+char* type) {
     
     FILE *file = fopen(file_name,"rt");
     if(file==NULL) {
@@ -38,7 +38,7 @@ int* no_image_loaded, char* type) {
         pixels = read_pixels(my_image.width,my_image.height,file); 
         if(pixels != NULL) {
             printf("Loaded %s\n",file_name);
-            *no_image_loaded = 0;}
+            }
 
         // Set new values for coordinates, dimensions and color
         *width = my_image.width;
@@ -72,7 +72,6 @@ int* no_image_loaded, char* type) {
         pixels = read_pixels(my_image.width*3,my_image.height,file); 
         if(pixels != NULL) {
             printf("Loaded %s\n",file_name);
-            *no_image_loaded=0;
         }
 
         // Set new values for coordinates, dimensions and color
@@ -131,7 +130,6 @@ int* no_image_loaded, char* type) {
             pixels = read_pixels_binary(my_width,my_height,file_bin); 
             if(pixels != NULL) {
                 printf("Loaded %s\n",file_name);
-                *no_image_loaded=0;
             }
 
             // Modify the dimensions
@@ -166,7 +164,6 @@ int* no_image_loaded, char* type) {
 
             if(pixels != NULL) {
                 printf("Loaded %s\n",file_name);
-                *no_image_loaded=0;
             }     
             
             // Modify the dimensions
@@ -717,8 +714,7 @@ void SAVE(const char *file_name,unsigned char **image,int width, const int heigh
 }
 
 // This function closes the program and frees the memory.
-void EXIT(char ** input,unsigned char*** image,const int height){
-    free(*input);
+void EXIT(unsigned char*** image,const int height){
     free_pixels(height,image);
     exit(EXIT_SUCCESS);
 }
@@ -727,26 +723,16 @@ void EXIT(char ** input,unsigned char*** image,const int height){
 // and,if true, executes the corresponding function
 void check_command(int command_value, int *width,  int *height, int *image_status,
 int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* color_image,
-char* type, int* my_image_max,int* no_image_loaded)
+char* type, int* my_image_max)
 {
-    // Check for wrong command
-    if(command_value ==  -1) {
-        char* error_input = (char*) malloc(100*sizeof(char));
-        fgets(error_input,100,stdin);
-        error_input[strlen(error_input)-1]='\0';
-        printf("Invalid command\n");
-        free(error_input);
-        return;
-    }
-    
     // Declare variables
     char *file_name= (char*) malloc(NAME_LENGTH_MAX*sizeof(char));
     int replace1=0,replace2=0,replace3=0,replace4=0, angle=0, binary=0;
     int whole_map_selected=0;
-    char* input_save = (char*) malloc(100*sizeof(char));
     char* new_file = (char*) malloc(100*sizeof(char));
     char* print_type = (char*) malloc(100*sizeof(char));
-    
+    char* first_command = (char*) malloc(MAX_COMMAND_SIZE * sizeof(char));
+
     // If the command_value returned a number between 0-8
     // then we can call the corresponding function
     switch(command_value) {
@@ -754,10 +740,10 @@ char* type, int* my_image_max,int* no_image_loaded)
         // FUNCTION: LOAD
         case 0:
             // Get file name
-            scanf("%s",file_name);
+            sscanf(*input,"%s %s",first_command,file_name);
             
             // Load the image in a dynamic matrix
-            *image = LOAD(file_name,width,height,x1,y1,x2,y2,color_image,my_image_max,no_image_loaded,type);
+            *image = LOAD(file_name,width,height,x1,y1,x2,y2,color_image,my_image_max,type);
 
             // Check image status
             if(*image != NULL)
@@ -768,7 +754,7 @@ char* type, int* my_image_max,int* no_image_loaded)
         // FUNCTION: SELECT
         case 1:
                 // Get the coordinates given by select
-                if((scanf("%d %d %d %d",&replace1,&replace2,&replace3,&replace4)) == 4 ) {
+                if((sscanf(*input,"%s %d %d %d %d",first_command,&replace1,&replace2,&replace3,&replace4)) == 5 ) {
                     if(*image_status == UPP)
                     {
                         *x1=replace1;
@@ -779,13 +765,11 @@ char* type, int* my_image_max,int* no_image_loaded)
                     }
                     else  {
                         printf("No image loaded\n");
-                        *no_image_loaded=1;
                     }
                     
                 }
                 else {
-                    printf("Invalid set of coordinates\n");
-                    *no_image_loaded=1;
+                    printf("Invalid set of coordinates\n");   
                 }
 
                 break;     
@@ -795,24 +779,24 @@ char* type, int* my_image_max,int* no_image_loaded)
             if(*image_status == UPP)
                 SELECT_ALL(width,height,x1,y1,x2,y2);
             else {
-                    printf("Invalid set of coordinates\n");
-                    *no_image_loaded=1;
+                    printf("No image loaded\n");
                 }
             break;
 
         // FUNCTION: ROTATE    
         case 3:
-               if(scanf("%d",&angle)) {
+        
+               if(sscanf(*input,"%s %d",first_command,&angle)) {
                    // If the image is loaded execute this. Else display "No image loaded"
                     if(*image_status == UPP) {
                         
-                        //  Check for valid angle
+                        // Check for valid angle
                         if(angle != 90 && angle !=-90 && angle != 180 && angle !=-180 && angle !=270 && angle !=-270)
-                            {printf("Unsupported rotation angle\n"); *no_image_loaded=1;}
+                            {printf("Unsupported rotation angle\n");}
                         
                         // Check if the coordinates form a square image
                         else if( ( (*x2-*x1) != (*y2-*y1)) && (*x1!=0 || *y1 !=0 || *x2!=*height || *y2 !=*width))
-                            {printf("The selection must be square\n");*no_image_loaded=1;}
+                            {printf("The selection must be square\n");}
                         else {
                             //  Check if the coordinates form the whole image
                             if(*x1==0 && *y1==0 && *x2== *height && *y2 == *width)
@@ -822,7 +806,6 @@ char* type, int* my_image_max,int* no_image_loaded)
                         
                     } else  {
                         printf("No image loaded\n");
-                        *no_image_loaded=1;
                         }
                 }
                 break;
@@ -833,7 +816,6 @@ char* type, int* my_image_max,int* no_image_loaded)
                     CROP(x1,y1,x2,y2,width,height);
                 else  {
                     printf("No image cropped\n");
-                    *no_image_loaded=1;
                 }
 
                 break;
@@ -841,6 +823,7 @@ char* type, int* my_image_max,int* no_image_loaded)
         // FUNCTION: GREYSCALE    
         case 5:
            if(*image_status == UPP) {
+
                 // Apply GRAYSCALE filter only if the image is a color one
                 if(*color_image == 1)
                     GRAYSCALE(x1,y1,x2,y2,image);
@@ -849,13 +832,13 @@ char* type, int* my_image_max,int* no_image_loaded)
            }     
             else  {
                 printf("No image loaded\n");
-                *no_image_loaded=1;
             }
                 break;
 
         // FUNCTION: SEPIA    
         case 6:
             if(*image_status == UPP) {
+
                 // Apply SEPIA filter only if the image is a color one
                 if(*color_image == 1)
                     SEPIA(x1,y1,x2,y2,image,*my_image_max);
@@ -864,16 +847,12 @@ char* type, int* my_image_max,int* no_image_loaded)
            }     
             else  {
                 printf("No image loaded\n");
-                *no_image_loaded=1;
             }
                 break;
             
         // FUNCTION: SAVE    
         case 7:
-            getc(stdin);
-            fgets(input_save,100,stdin);
-
-            sscanf(input_save,"%s %s",new_file, print_type);
+            sscanf(*input,"%s %s %s",first_command,new_file, print_type);
             if(strcmp(print_type,"ascii")==0)
                 binary=0;
             else binary=1;
@@ -883,18 +862,16 @@ char* type, int* my_image_max,int* no_image_loaded)
             }
             else  {
                 printf("No image loaded\n");
-                *no_image_loaded=1;
             }
             break;
 
         // FUNCTION: EXIT 
         case 8:
-                EXIT(input,image,*height);
+                EXIT(image,*height);
                 break;
 
-        // NO FUNCTION: "INVALID COMMAND"
+        // NO RECOGNIZED FUNCTION: "INVALID COMMAND"
         default:
-            if(*no_image_loaded==1)
                 printf("Invalid command\n");
             break;
         
