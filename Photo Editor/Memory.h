@@ -21,7 +21,7 @@ void free_pixels(const int, unsigned char ***);
 
 // This functions creates a copy of the current selection.
 unsigned char **copy_pixels_selection(
-		const int, const int, const int, const int, unsigned char ***);
+const int, const int, const int, const int, unsigned char ***);
 
 // Image properties
 typedef struct {
