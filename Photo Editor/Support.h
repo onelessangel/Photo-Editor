@@ -18,16 +18,16 @@ void SELECT_ALL(int*, int*, int*, int*, int*, int*);
 void ROTATE(const int,unsigned char***, int*, int*, int*, int*, const int, int*, int*,const int);
 
 // This function crops the image.
-void CROP(int*,int*,int*,int*,int*,int*);
+void CROP(int*,int*,int*,int*,int*,int*,const int);
 
 // This function will turn the image to grayscale format.
-void GRAYSCALE(int*,int*,int*,int*,unsigned char***);
+void GRAYSCALE(int*,int*,int*,int*,unsigned char***,const int);
 
 // This functions returns the lowest value from the comparison of two values
 int minimum_value(int, int);
 
 // This function will turn the image to sepia format.
-void SEPIA(int*,int*,int*,int*,unsigned char***,int*);
+void SEPIA(int*,int*,int*,int*,unsigned char***,int*,const int);
 
 // This function saves the current image to a file in the specified format.
 void SAVE(const char*,unsigned char**,int,const int,const int, const char*,int);
@@ -37,7 +37,7 @@ void EXIT(unsigned char***,const int);
 
 // This functions checks if an valid command has been received
 // and, if true, executes the corresponding function.
-void check_command(const int, int*, int*,int*,int*, int*,int*,int*,unsigned char***,char**,int*,char*,int*);
+void check_command(const int, int*, int*,int*,int*, int*,int*,int*,unsigned char***,char**,int*,char*,int*,int*);
 
 
 // Exit status
