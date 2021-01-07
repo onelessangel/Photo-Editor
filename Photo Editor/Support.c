@@ -190,7 +190,7 @@ char* type) {
 
 // This function selects a part of the area.
 void SELECT(int* x1, int* y1, int* x2, int* y2, int *width, int *height){
-
+    
         // Chech if the coordinates are valid
         if(*x1<0 || *x2 < 0 || *y1 < 0 || *y2 < 0) 
             printf("Invalid coordinates\n");
@@ -512,17 +512,25 @@ void ROTATE(int angle, unsigned char*** image, int *x1, int *y1, int *x2, int *y
 }
 
 // This function crops the image.
-void CROP(int *x1, int *y1, int *x2,int *y2,int *width,int* height) {
+void CROP(int *x1, int *y1, int *x2,int *y2,int *width,int* height,const int color_image) {
 
-    *height=*x2-*x1;
-    *width=*y2-*y1;
-    printf("Image cropped\n");
+    if(color_image==0) {
+        *height=*x2-*x1;
+        *width=*y2-*y1;
+    }
+    else if(color_image==1) {
+        *height=*x2-*x1;
+        *width=(*y2-*y1)*3;
+
+    }
+        printf("Image cropped\n");
 }
 
 // This function will turn the image to grayscale format.
-void GRAYSCALE(int *x1,int *y1,int *x2,int *y2,unsigned char*** image) {
+void GRAYSCALE(int *x1,int *y1,int *x2,int *y2,unsigned char*** image,const int color_image) {
     double RGB_2_GRAYSCALE=0.00;
     int RGB_int;
+    if(color_image==0) {
     for(int i=*x1;i<*x2;i++)
         for(int j=*y1;j<*y2;j=j+3) {
 
@@ -531,7 +539,19 @@ void GRAYSCALE(int *x1,int *y1,int *x2,int *y2,unsigned char*** image) {
             RGB_int = RGB_2_GRAYSCALE;
             (*image)[i][j]=(*image)[i][j+1]=(*image)[i][j+2]=RGB_int;
         }
+    }
+    else if(color_image==1) {
+        for(int i=*x1;i<*x2;i++)
+            for(int j=(*y1*3);j<(*y2*3);j=j+3) {
 
+            // Formula for RGB
+            RGB_2_GRAYSCALE=((*image)[i][j]+(*image)[i][j+1]+(*image)[i][j+2])/3.0;
+            RGB_int = RGB_2_GRAYSCALE;
+            (*image)[i][j]=(*image)[i][j+1]=(*image)[i][j+2]=RGB_int;
+        }
+
+
+    }
     printf("Grayscale filter applied\n");
 }
 
@@ -542,9 +562,11 @@ int minimum_value(int first_value, int second_value) {
 }
 
 // This function will turn the image to sepia format.
-void SEPIA(int *x1,int *y1,int *x2,int *y2,unsigned char*** image, const int my_image_max){
+void SEPIA(int *x1,int *y1,int *x2,int *y2,unsigned char*** image, const int my_image_max, const int color_image){
     double R,G,B;
     int R_int, G_int,B_int;
+    
+    if(color_image==0) {
     for(int i=*x1;i<*x2;i++)
         for(int j=*y1;j<*y2;j=j+3) {
             
@@ -568,6 +590,33 @@ void SEPIA(int *x1,int *y1,int *x2,int *y2,unsigned char*** image, const int my_
             (*image)[i][j+1]=G_int;
             (*image)[i][j+2]=B_int;
         }
+    }
+    else if(color_image==0) {
+        for(int i=*x1;i<*x2;i++)
+            for(int j=(*y1*3);j<(*y2*3);j=j+3) {
+                
+                // Formula for SEPIA red color.
+                R=0.393*(*image)[i][j] + 0.769*(*image)[i][j+1] + 0.189* (*image)[i][j+2];
+                R_int = R;
+                if(R_int>my_image_max) R_int = minimum_value(R_int,my_image_max);
+
+                // Formula for SEPIA green color.
+                G=0.349*(*image)[i][j] + 0.686*(*image)[i][j+1] + 0.168* (*image)[i][j+2];
+                G_int = G;
+                if(G_int>my_image_max) G_int = minimum_value(G_int,my_image_max);
+
+                // Formula for SEPIA blue color.
+                B=0.272*(*image)[i][j] + 0.534*(*image)[i][j+1] + 0.131* (*image)[i][j+2];
+                B_int = B;
+                if(B_int>my_image_max) B_int = minimum_value(B_int,my_image_max);
+
+                // Apply the new colors
+                (*image)[i][j]=R_int;
+                (*image)[i][j+1]=G_int;
+                (*image)[i][j+2]=B_int;
+            }
+    }
+
     printf("Sepia filter applied\n");
 }
 
@@ -723,12 +772,11 @@ void EXIT(unsigned char*** image,const int height){
 // and,if true, executes the corresponding function
 void check_command(int command_value, int *width,  int *height, int *image_status,
 int *x1, int *y1, int *x2, int *y2, unsigned char ***image, char** input,int* color_image,
-char* type, int* my_image_max)
+char* type, int* my_image_max,int* whole_map_selected)
 {
     // Declare variables
     char *file_name= (char*) malloc(NAME_LENGTH_MAX*sizeof(char));
     int replace1=0,replace2=0,replace3=0,replace4=0, angle=0, binary=0;
-    int whole_map_selected=0;
     char* new_file = (char*) malloc(100*sizeof(char));
     char* print_type = (char*) malloc(100*sizeof(char));
     char* first_command = (char*) malloc(MAX_COMMAND_SIZE * sizeof(char));
@@ -800,8 +848,8 @@ char* type, int* my_image_max)
                         else {
                             //  Check if the coordinates form the whole image
                             if(*x1==0 && *y1==0 && *x2== *height && *y2 == *width)
-                                whole_map_selected = 1;
-                            ROTATE(angle, image,x1,y1,x2,y2,whole_map_selected,width,height,*color_image);
+                                *whole_map_selected = 1;
+                            ROTATE(angle, image,x1,y1,x2,y2,*whole_map_selected,width,height,*color_image);
                         }
                         
                     } else  {
@@ -813,7 +861,7 @@ char* type, int* my_image_max)
         // FUNCTION: CROP   
         case 4:
                 if(*image_status == UPP)
-                    CROP(x1,y1,x2,y2,width,height);
+                    CROP(x1,y1,x2,y2,width,height,*color_image);
                 else  {
                     printf("No image cropped\n");
                 }
@@ -826,7 +874,7 @@ char* type, int* my_image_max)
 
                 // Apply GRAYSCALE filter only if the image is a color one
                 if(*color_image == 1)
-                    GRAYSCALE(x1,y1,x2,y2,image);
+                    GRAYSCALE(x1,y1,x2,y2,image,*color_image);
                 else 
                     printf("Grayscale filter not available\n");      
            }     
@@ -841,7 +889,7 @@ char* type, int* my_image_max)
 
                 // Apply SEPIA filter only if the image is a color one
                 if(*color_image == 1)
-                    SEPIA(x1,y1,x2,y2,image,*my_image_max);
+                    SEPIA(x1,y1,x2,y2,image,*my_image_max,*color_image);
                 else 
                     printf("Sepia filter not available\n");        
            }     
