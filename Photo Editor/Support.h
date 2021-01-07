@@ -6,7 +6,7 @@
 
 // This function loads the image from the file
 // and keeps the width and the height.
-unsigned char** LOAD(const char*,int*,int*,int*,int*,int*,int*,int*,int*,int*,char*);
+unsigned char** LOAD(const char*,int*,int*,int*,int*,int*,int*,int*,int*,char*);
 
 // This function selects a part of the area.
 void SELECT(int*, int*, int*, int*, int*, int*);
@@ -33,11 +33,11 @@ void SEPIA(int*,int*,int*,int*,unsigned char***,int*);
 void SAVE(const char*,unsigned char**,int,const int,const int, const char*,int);
 
 // This function closes the program and frees the memory.
-void EXIT(char**,unsigned char***,const int);
+void EXIT(unsigned char***,const int);
 
 // This functions checks if an valid command has been received
 // and, if true, executes the corresponding function.
-void check_command(const int, int*, int*,int*,int*, int*,int*,int*,unsigned char***,char**,int*,char*,int* ,int*);
+void check_command(const int, int*, int*,int*,int*, int*,int*,int*,unsigned char***,char**,int*,char*,int*);
 
 
 // Exit status
