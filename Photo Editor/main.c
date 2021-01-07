@@ -20,7 +20,7 @@ int main(void) {
     unsigned char **image = NULL;
     int width = 0, height = 0, image_status=DOWN;
     int x1=0,y1=0,x2=0,y2=0, my_image_max=0;
-    int color_image=0, no_image_loaded = 1;
+    int color_image=0;
     char type = '0';
 
     // Set COMMAND
@@ -31,17 +31,18 @@ int main(void) {
 
     // Receive commands and execute them
     while(UP) {
-        scanf("%s",input);
+        fgets(input,MAX_COMMAND_SIZE,stdin);
 
         // Check what command is given and whether it exists or not.
         int command_value = find_command_value(commands, input);
-
+    
         // If it exists, execute it.
-        check_command(command_value, &width, &height, &image_status,&x1,&y1,&x2,&y2,&image,&input,&color_image,&type,&my_image_max,&no_image_loaded);
+        check_command(command_value, &width, &height, &image_status,&x1,&y1,&x2,&y2,&image,&input,&color_image,&type,&my_image_max);
     }
 
     // Free memory
     free(commands);
+    free(input);
 
     return SUCCESS;
 }
