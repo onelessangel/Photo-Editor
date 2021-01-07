@@ -104,7 +104,8 @@ int* no_image_loaded, char* type) {
             return (unsigned char**) FILE_CLOSE_ERROR;
 
         // Open the same file, but as binary
-        FILE *file_bin = fopen(file_name,"rb");
+        FILE *file_bin = NULL;
+        file_bin = fopen(file_name,"rb");
     
         // Get the type of file and the image restrictions
         char file_type2[2];
@@ -124,7 +125,7 @@ int* no_image_loaded, char* type) {
 
         // Binary GRAYSCALE
         if(second_character=='G') {
-        
+           
             // Read the image
             unsigned char** pixels = NULL;
             pixels = read_pixels_binary(my_width,my_height,file_bin); 
@@ -142,6 +143,7 @@ int* no_image_loaded, char* type) {
             *y2=my_width;
             *color_image=0;
             *type='5';
+
             // Close the file
             if(fclose(file_bin) == EOF)
                 return (unsigned char**) FILE_CLOSE_ERROR;
@@ -151,10 +153,14 @@ int* no_image_loaded, char* type) {
         
         // Binary RGB
         else if(second_character=='R') {
-            
+        
+           
             // Read the image
             unsigned char** pixels = NULL;
+            printf("AM trimis %d %d",my_width*3,my_height);
+            exit(1);
             pixels = read_pixels_binary(my_width*3,my_height,file_bin); 
+            
             if(pixels != NULL) {
                 printf("Loaded %s\n",file_name);
                 *no_image_loaded=0;
@@ -261,25 +267,24 @@ void ROTATE(int angle, unsigned char*** image, int *x1, int *y1, int *x2, int *y
 
         else if(color_image==1) {
 
-            TO DO FOR RGB
             // Rotate to 90/-270 degrees
             if(angle == 90 || angle == -270) {
                 for(int i=0;i<(*x2-*x1);i++) 
-                    for(int j=0;j<(*y2-*y1);j++) 
+                    for(int j=0;j<(*y2*3-*y1*3);j++) 
                         (*image)[*x1+i][*y1+j]=pixels[*x2-1-j][*y1+i];
             }
 
             // Rotate to 180/-180 degrees
             else if(angle == 180 || angle == -180) {
                 for(int i=0;i<(*x2-*x1);i++) 
-                    for(int j=0;j<(*y2-*y1);j++) 
+                    for(int j=0;j<(*y2*3-*y1*3);j++) 
                         (*image)[*x1+i][*y1+j]=pixels[*x2-1-i][*y2-1-j];
             } 
 
             // Rotate to 270/-90 degrees
             else if(angle == 270 || angle == -90) {
                 for(int i=0;i<(*x2-*x1);i++) 
-                    for(int j=0;j<(*y2-*y1);j++) 
+                    for(int j=0;j<(*y2*3-*y1*3);j++) 
                         (*image)[*x2-1-j][*y1+i]=pixels[*x1+i][*y1+j];
             }    
         }
@@ -571,7 +576,7 @@ void SAVE(const char *file_name,unsigned char **image,int width, const int heigh
 
     FILE *new_file;
     
-    // Open in binary mode
+    // Save in binary mode
     if(binary == 1) {
         new_file=fopen(file_name,"wb");
         if(new_file == NULL)
@@ -579,36 +584,61 @@ void SAVE(const char *file_name,unsigned char **image,int width, const int heigh
 
         if(type=='5') {
             char Px[2]="P5";
-            fwrite(Px,sizeof(char),2,new_file);
-            fwrite(&width,sizeof(int),1,new_file);
-            fwrite(&height,sizeof(int),1,new_file);
-            fwrite(&my_image_max,sizeof(int),1,new_file);
+            fprintf(new_file,"%s\n",Px);
+            fprintf(new_file,"%d %d\n%d\n",width,height,my_image_max);
+
             for(int i=0;i<height;i++)
                 for(int j=0;j<width;j++)
                     fwrite(&image[i][j],sizeof(unsigned char),1,new_file);
 
-          if(fclose(new_file)== EOF) {
+          if(fclose(new_file)== EOF) 
                 return;
-            }
+
         }
         else if(type=='6') {
             width=width/3;
             char Px[2]="P6";
-            fwrite(Px,sizeof(char),2,new_file);
-            fwrite(&width,sizeof(int),1,new_file);
-            fwrite(&height,sizeof(int),1,new_file);
-            fwrite(&my_image_max,sizeof(int),1,new_file);
+            fprintf(new_file,"%s\n",Px);
+            fprintf(new_file,"%d %d\n%d\n",width,height,my_image_max);
+
             for(int i=0;i<height;i++)
                 for(int j=0;j<width*3;j++)
                     fwrite(&image[i][j],sizeof(unsigned char),1,new_file);
 
-          if(fclose(new_file)== EOF) {
+          if(fclose(new_file)== EOF) 
                 return;
-            }
 
         } 
+        else if(type=='2') {
+            char Px[2]="P5";
+            fprintf(new_file,"%s\n",Px);
+            fprintf(new_file,"%d %d\n%d\n",width,height,my_image_max);
+
+            for(int i=0;i<height;i++)
+                for(int j=0;j<width;j++)
+                    fwrite(&image[i][j],sizeof(unsigned char),1,new_file);
+
+          if(fclose(new_file)== EOF) 
+                return;
+
+        }
+        else if(type=='3') {
+            width=width/3;
+            char Px[2]="P6";
+            fprintf(new_file,"%s\n",Px);
+            fprintf(new_file,"%d %d\n%d\n",width,height,my_image_max);
+
+            for(int i=0;i<height;i++)
+                for(int j=0;j<width*3;j++)
+                    fwrite(&image[i][j],sizeof(unsigned char),1,new_file);
+
+          if(fclose(new_file)== EOF) 
+                return;
+
+        }
     }
-    // Open in ascii mode
+
+    // Save in ascii mode
     else if(binary == 0) {
         new_file=fopen(file_name,"wt");
         if(new_file == NULL)
@@ -624,11 +654,10 @@ void SAVE(const char *file_name,unsigned char **image,int width, const int heigh
                     fprintf(new_file,"\n");
                 }
             
-              if(fclose(new_file)== EOF) {
+              if(fclose(new_file)== EOF) 
                 return;
-            }
             
-    }
+        }
         else if(type=='3') {
             char Px[2]="P3";
             width=width/3;
@@ -642,11 +671,43 @@ void SAVE(const char *file_name,unsigned char **image,int width, const int heigh
             fseek(new_file,-1,SEEK_END);
             getc(new_file);
 
-            if(fclose(new_file)== EOF) {
+            if(fclose(new_file)== EOF) 
                 return;
-            }
+        }
+
+        else if(type=='5') {
+            char Px[2]="P2";
+            fprintf(new_file,"%s\n",Px);
+            fprintf(new_file,"%d %d\n%d\n",width,height,my_image_max);
+     
+            for(int i=0;i<height;i++) {
+                for(int j=0;j<width;j++)  fprintf(new_file,"%hhu ",image[i][j]);
+                    fprintf(new_file,"\n");
+                }
+            
+              if(fclose(new_file)== EOF) 
+                return;
+            
+        }
+
+        else if(type=='6') {
+            char Px[2]="P3";
+            width=width/3;
+            fprintf(new_file,"%s\n",Px);
+            fprintf(new_file,"%d %d\n%d\n",width,height,my_image_max);
+     
+            for(int i=0;i<height;i++) {
+                for(int j=0;j<width*3;j++)  fprintf(new_file,"%hhu ",image[i][j]);
+                    fprintf(new_file,"\n");
+                }
+            fseek(new_file,-1,SEEK_END);
+            getc(new_file);
+
+            if(fclose(new_file)== EOF) 
+                return;
 
         }
+
     }
 
     printf("Saved %s\n",file_name);
@@ -677,11 +738,11 @@ char* type, int* my_image_max,int* no_image_loaded)
     
     // Declare variables
     char *file_name= (char*) malloc(NAME_LENGTH_MAX*sizeof(char));
-    int replace1=0,replace2=0,replace3=0,replace4=0, angle=0;
+    int replace1=0,replace2=0,replace3=0,replace4=0, angle=0, binary=0;
     int whole_map_selected=0;
     char* input_save = (char*) malloc(100*sizeof(char));
-    char* word, binary=0;
-    char* new_file = (char*) malloc(100*sizeof(int));
+    char* new_file = (char*) malloc(100*sizeof(char));
+    char* print_type = (char*) malloc(100*sizeof(char));
     
     // If the command_value returned a number between 0-8
     // then we can call the corresponding function
@@ -808,12 +869,11 @@ char* type, int* my_image_max,int* no_image_loaded)
         case 7:
             getc(stdin);
             fgets(input_save,100,stdin);
-            word = strtok(input_save," ");
-            strcpy(new_file,word);
-            word = strtok(NULL," ");
-            if ( word == NULL )
-                binary=1;
-            else binary=0;
+
+            sscanf(input_save,"%s %s",new_file, print_type);
+            if(strcmp(print_type,"ascii")==0)
+                binary=0;
+            else binary=1;
 
             if(*image_status == UPP) {
                 SAVE(new_file,*image,*width,*height,binary,*type,*my_image_max);
