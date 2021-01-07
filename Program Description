@@ -80,7 +80,4 @@ respectively in the range [y1, y2] on the Y axis (image height).
 - Makes the program close gracefully.
 ∗ This process means freeing the memory, closing files and stopping the execution of the program.
 
-*A line that cannot be interpreted as one of the above commands will have the result displayed: "Invalid command" and will not generate other effects.
-
-
-
+#  • A line that cannot be interpreted as one of the above commands will have the result displayed: "Invalid command" and will not generate other effects.
