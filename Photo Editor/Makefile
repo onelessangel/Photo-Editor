@@ -12,7 +12,6 @@ TARGETS=Program Commands Memory link_objects
 # execute
 build: 	$(TARGETS) 
 
-
 # create binary files
 Program: Program.c
 	$(CC) $(CFLAGS) -c Program.c
