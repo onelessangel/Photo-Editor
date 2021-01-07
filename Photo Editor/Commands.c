@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 // This function loads the image from the file
 // and keeps the width and the height.
@@ -22,6 +23,7 @@ int *y1, int *x2, int *y2, int *color_image, int *my_image_max, char *type) {
 
 	// Check for text files
 	if (second_character == '2') {
+
 		// GRAYSCALE - ASCII
 		int val1, val2, val3;
 		fscanf(file, "%d %d %d", &val1, &val2, &val3);
@@ -55,6 +57,7 @@ int *y1, int *x2, int *y2, int *color_image, int *my_image_max, char *type) {
 	}
 
 	else if (second_character == '3') {
+
 		// RGB - ASCII
 		int val1, val2, val3;
 		fscanf(file, "%d %d %d", &val1, &val2, &val3);
@@ -89,6 +92,7 @@ int *y1, int *x2, int *y2, int *color_image, int *my_image_max, char *type) {
 
 	// Check for binary files
 	else {
+
 		// Put the read characters back into the file
 		ungetc(first_character, file);
 		ungetc(second_character, file);
@@ -120,6 +124,7 @@ int *y1, int *x2, int *y2, int *color_image, int *my_image_max, char *type) {
 
 		// Binary GRAYSCALE
 		if (second_character == 'G') {
+
 			// Read the image
 			unsigned char **pixels = NULL;
 			pixels = (unsigned char **)malloc(
@@ -155,6 +160,7 @@ int *y1, int *x2, int *y2, int *color_image, int *my_image_max, char *type) {
 
 		// Binary RGB
 		else if (second_character == 'R') {
+
 			// Read the image
 			unsigned char **pixels = NULL;
 			pixels = (unsigned char **)malloc(
@@ -195,7 +201,8 @@ int *y1, int *x2, int *y2, int *color_image, int *my_image_max, char *type) {
 // This function selects a part of the area.
 void SELECT(int *x1, int *y1, int *x2, int *y2, int *width, int *height,
 int *correct) {
-	// Chech if the coordinates are valid
+
+	// Check if the coordinates are valid
 	if (*x1 < 0 || *x2 < 0 || *y1 < 0 || *y2 < 0)
 		printf("Invalid coordinates\n");
 	else if (*x1 > *width || *x2 > *width)
@@ -223,6 +230,7 @@ int *correct) {
 
 // This function selects the whole area.
 void SELECT_ALL(int *width, int *height, int *x1, int *y1, int *x2, int *y2) {
+
 	*x1 = 0;
 	*y1 = 0;
 	*x2 = *height;
@@ -236,14 +244,18 @@ void SELECT_ALL(int *width, int *height, int *x1, int *y1, int *x2, int *y2) {
 void ROTATE(int angle, unsigned char ***image, int *x1, int *y1, int *x2,
 int *y2, const int whole_map_selected, int *width, int *height,
 const int color_image) {
+
 	// Case one: only a part of the image is selected (a square submatrix)
 	if (!whole_map_selected) {
+		printf("Not whole map selected");
 		// Create copy of the current selection
 		unsigned char **pixels =
 				copy_pixels_selection(*x1, *y1, *x2, *y2, image);
+
 		if (pixels == NULL)
 			return;
 		if (color_image == 0) {
+
 			// Rotate to 90/-270 degrees
 			if (angle == 90 || angle == -270) {
 				for (int i = 0; i < (*x2 - *x1); i++)
@@ -273,6 +285,8 @@ const int color_image) {
 		}
 
 		else if (color_image == 1) {
+			FIX THISSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+			exit(1);
 			// Rotate to 90/-270 degrees
 			if (angle == 90 || angle == -270) {
 				for (int i = 0; i < (*x2 - *x1); i++)
@@ -301,9 +315,11 @@ const int color_image) {
 
 	// Case two: the whole map is selected (it might not be a square matrix)
 	else if (whole_map_selected) {
+		printf("Whole map selected");
 		// Rotate to 90/-270 degrees
 		if (angle == 90 || angle == -270) {
 			if (color_image == 0) {
+
 				// Get the minimum square matrix necessary
 				int max_size = *height;
 				if (max_size < *width)
@@ -335,6 +351,7 @@ const int color_image) {
 				*y2 = *width;
 
 			} else if (color_image == 1) {
+
 				// Get the minimum square matrix necessary
 				int new_height = *width / 3;
 				int new_width = *height * 3;
@@ -380,6 +397,7 @@ const int color_image) {
 		// Rotate to 180/-180 degrees
 		else if (angle == 180 || angle == -180) {
 			if (color_image == 0) {
+
 				// Get the minimum square matrix necessary
 				int max_size = *height;
 				if (max_size < *width)
@@ -412,6 +430,7 @@ const int color_image) {
 			}
 
 			else if (color_image == 1) {
+
 				// Get the minimum square matrix necessary
 				int max_size = *height;
 				if (max_size < *width)
@@ -457,6 +476,7 @@ const int color_image) {
 		// Rotate to 270/-90 degrees
 		else if (angle == 270 || angle == -90) {
 			if (color_image == 0) {
+
 				// Get the minimum square matrix necessary
 				int max_size = *height;
 				if (max_size < *width)
@@ -485,6 +505,7 @@ const int color_image) {
 				*y2 = *width;
 
 			} else if (color_image == 1) {
+
 				// Get the minimum square matrix necessary
 				int new_height = *width / 3;
 				int new_width = *height * 3;
@@ -530,7 +551,8 @@ const int color_image) {
 
 // This function crops the image.
 void CROP(int *x1, int *y1, int *x2, int *y2, int *width, int *height,
-		const int color_image) {
+const int color_image) {
+
 	if (color_image == 0) {
 		*height = *x2 - *x1;
 		*width = *y2 - *y1;
@@ -544,27 +566,28 @@ void CROP(int *x1, int *y1, int *x2, int *y2, int *width, int *height,
 // This function will turn the image to grayscale format.
 void GRAYSCALE(int *x1, int *y1, int *x2, int *y2, unsigned char ***image,
 const int color_image) {
+
 	double RGB_2_GRAYSCALE = 0.00;
 	int RGB_int;
 	if (color_image == 0) {
 		for (int i = *x1; i < *x2; i++)
 			for (int j = *y1; j < *y2; j = j + 3) {
+
 				// Formula for RGB
 				RGB_2_GRAYSCALE = ((*image)[i][j] + (*image)[i][j + 1] +
-										  (*image)[i][j + 2]) /
-								  3.0;
-				RGB_int = RGB_2_GRAYSCALE;
+				(*image)[i][j + 2]) / 3.0;
+				RGB_int = round(RGB_2_GRAYSCALE);
 				(*image)[i][j] = (*image)[i][j + 1] = (*image)[i][j + 2] =
 						RGB_int;
 			}
+
 	} else if (color_image == 1) {
 		for (int i = *x1; i < *x2; i++)
 			for (int j = (*y1 * 3); j < (*y2 * 3); j = j + 3) {
 				// Formula for RGB
 				RGB_2_GRAYSCALE = ((*image)[i][j] + (*image)[i][j + 1] +
-										  (*image)[i][j + 2]) /
-								  3.0;
-				RGB_int = RGB_2_GRAYSCALE;
+				(*image)[i][j + 2]) /3.0;
+				RGB_int = round(RGB_2_GRAYSCALE);
 				(*image)[i][j] = (*image)[i][j + 1] = (*image)[i][j + 2] =
 						RGB_int;
 			}
@@ -574,6 +597,7 @@ const int color_image) {
 
 // This functions returns the lowest value from the comparison of two values
 int minimum_value(int first_value, int second_value) {
+
 	if (first_value > second_value)
 		return second_value;
 	return first_value;
@@ -585,27 +609,29 @@ const int my_image_max, const int color_image) {
 	double R, G, B;
 	int R_int, G_int, B_int;
 
+	// If the image is not RGB
 	if (color_image == 0) {
 		for (int i = *x1; i < *x2; i++)
 			for (int j = *y1; j < *y2; j = j + 3) {
+
 				// Formula for SEPIA red color.
 				R = 0.393 * (*image)[i][j] + 0.769 * (*image)[i][j + 1] +
 					0.189 * (*image)[i][j + 2];
-				R_int = R;
+				R_int = round(R);
 				if (R_int > my_image_max)
 					R_int = minimum_value(R_int, my_image_max);
 
 				// Formula for SEPIA green color.
 				G = 0.349 * (*image)[i][j] + 0.686 * (*image)[i][j + 1] +
 					0.168 * (*image)[i][j + 2];
-				G_int = G;
+				G_int = round(G);
 				if (G_int > my_image_max)
 					G_int = minimum_value(G_int, my_image_max);
 
 				// Formula for SEPIA blue color.
 				B = 0.272 * (*image)[i][j] + 0.534 * (*image)[i][j + 1] +
 					0.131 * (*image)[i][j + 2];
-				B_int = B;
+				B_int = round(B);
 				if (B_int > my_image_max)
 					B_int = minimum_value(B_int, my_image_max);
 
@@ -614,27 +640,30 @@ const int my_image_max, const int color_image) {
 				(*image)[i][j + 1] = G_int;
 				(*image)[i][j + 2] = B_int;
 			}
+
+	// If the image is RGB
 	} else if (color_image == 1) {
 		for (int i = *x1; i < *x2; i++)
 			for (int j = (*y1 * 3); j < (*y2 * 3); j = j + 3) {
+
 				// Formula for SEPIA red color.
 				R = 0.393 * (*image)[i][j] + 0.769 * (*image)[i][j + 1] +
 					0.189 * (*image)[i][j + 2];
-				R_int = R;
+				R_int = round(R);
 				if (R_int > my_image_max)
 					R_int = minimum_value(R_int, my_image_max);
 
 				// Formula for SEPIA green color.
 				G = 0.349 * (*image)[i][j] + 0.686 * (*image)[i][j + 1] +
 					0.168 * (*image)[i][j + 2];
-				G_int = G;
+				G_int = round(G);
 				if (G_int > my_image_max)
 					G_int = minimum_value(G_int, my_image_max);
 
 				// Formula for SEPIA blue color.
 				B = 0.272 * (*image)[i][j] + 0.534 * (*image)[i][j + 1] +
 					0.131 * (*image)[i][j + 2];
-				B_int = B;
+				B_int = round(B);
 				if (B_int > my_image_max)
 					B_int = minimum_value(B_int, my_image_max);
 
@@ -651,6 +680,7 @@ const int my_image_max, const int color_image) {
 // This function saves the current image to a file in the specified format.
 void SAVE(const char *file_name, unsigned char **image, int width,
 const int height, const int binary, const char type, int my_image_max) {
+	
 	FILE *new_file;
 
 	// Save in binary mode
@@ -814,7 +844,7 @@ int *my_image_max, int *whole_map_selected, int *correct) {
 		case 0:
 			// Get file name
 			sscanf(*input, "%s %s", first_command, file_name);
-
+			free(first_command);
 			// Load the image in a dynamic matrix
 			*image = LOAD(file_name, width, height, x1, y1, x2, y2, color_image,
 					my_image_max, type);
@@ -822,7 +852,7 @@ int *my_image_max, int *whole_map_selected, int *correct) {
 			// Check image status
 			if (*image != NULL)
 				*image_status = UPP;
-
+			free(file_name);
 			break;
 
 		// FUNCTION: SELECT
@@ -830,6 +860,7 @@ int *my_image_max, int *whole_map_selected, int *correct) {
 			// Get the coordinates given by select
 			if ((sscanf(*input, "%s %d %d %d %d", first_command, &replace1,
 						&replace2, &replace3, &replace4)) == 5) {
+				free(first_command);
 				if (*image_status == UPP) {
 					SELECT(&replace1, &replace2, &replace3, &replace4, width,
 							height, correct);
@@ -881,6 +912,12 @@ int *my_image_max, int *whole_map_selected, int *correct) {
 						if (*x1 == 0 && *y1 == 0 && *x2 == *height &&
 								*y2 == *width)
 							*whole_map_selected = 1;
+						else
+						{
+							*whole_map_selected=0;
+						}
+						
+						printf("I will rotate with %d %d %d %d %d %d",*x1,*y1,*x2,*y2,*width,*height);
 						ROTATE(angle, image, x1, y1, x2, y2,
 								*whole_map_selected, width, height,
 								*color_image);
@@ -935,6 +972,8 @@ int *my_image_max, int *whole_map_selected, int *correct) {
 				binary = 0;
 			else
 				binary = 1;
+
+			free(print_type);
 
 			if (*image_status == UPP) {
 				SAVE(new_file, *image, *width, *height, binary, *type,
