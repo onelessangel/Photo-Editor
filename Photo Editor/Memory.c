@@ -12,7 +12,7 @@ enum { MAX_COMMAND_SIZE = 100, DEFINED_COMMANDS = 9 };
 
 // This function allocates the space necessary for a command.
 char *user_input(void) {
-	char *input = (char *)malloc(MAX_COMMAND_SIZE * sizeof(char));
+char *input = (char *)malloc(MAX_COMMAND_SIZE * sizeof(char));
 
 	if (input == NULL)
 		return (char *)MALLOC_FAIL;
@@ -43,6 +43,9 @@ int find_command_value(const char *commands[], char *input) {
 		}
 	if (command_value == 1 && (strcmp(second_command, "ALL") == 0))
 		command_value = 2;
+	
+	free(first_command);
+	free(second_command);
 
 	return command_value;
 }
@@ -50,7 +53,8 @@ int find_command_value(const char *commands[], char *input) {
 // This functions allocates the memory for the image pixels
 // and saves the pixels in a matrix shape, reading from an ASCII file
 unsigned char **read_pixels(
-		const int my_image_width, const int my_image_height, FILE *file) {
+const int my_image_width, const int my_image_height, FILE *file) {
+
 	// Allocate memory
 	unsigned char **pixel_matrix =
 			(unsigned char **)malloc(my_image_width * sizeof(unsigned char *));
@@ -69,6 +73,7 @@ unsigned char **read_pixels(
 // This functions creates a copy of the current selection
 unsigned char **copy_pixels_selection(const int x1, const int y1, const int x2,
 const int y2, unsigned char ***image) {
+
 	// find the width and the height of the image
 	int my_image_width = y2 - y1;
 	int my_image_height = x2 - x1;
