@@ -3,31 +3,28 @@
 # compiler setup
 CC=gcc
 CFLAGS=-Wall -Wextra
-OBJ=main.o Support.o Memory.o
+OBJ=Program.o Commands.o Memory.o
 NAME=app
 
-
 # define targets
-TARGETS=main Support Memory link_objects
-
+TARGETS=Program Commands Memory link_objects
 
 # execute
 build: 	$(TARGETS) 
 
 
 # create binary files
-main: main.c
-	$(CC) $(CFLAGS) -c main.c
+Program: Program.c
+	$(CC) $(CFLAGS) -c Program.c
 
-Support: Support.c
-	$(CC) $(CFLAGS) -c Support.c
+Commands: Commands.c
+	$(CC) $(CFLAGS) -c Commands.c
 
 Memory: Memory.c
 	$(CC) $(CFLAGS) -c Memory.c
 
-
 # link the files, create executable
-link_objects: main.o Support.o Memory.o
+link_objects: Program.o Commands.o Memory.o
 	gcc -o $(NAME) $(OBJ) $(CFLAGS)
 	rm $(OBJ)
 
