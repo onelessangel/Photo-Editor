@@ -154,17 +154,20 @@ int* no_image_loaded, char* type) {
         // Binary RGB
         else if(second_character=='R') {
         
-           
             // Read the image
             unsigned char** pixels = NULL;
-            printf("AM trimis %d %d",my_width*3,my_height);
-            exit(1);
-            pixels = read_pixels_binary(my_width*3,my_height,file_bin); 
+            pixels = (unsigned char**) malloc(my_height * sizeof(unsigned char*));
+            for(int i=0;i<my_height;i++)
+                pixels[i] = (unsigned char*) malloc(3 * my_width * sizeof(unsigned char));
             
+            for(int i=0;i<my_height;i++) 
+                for(int j=0;j<(3*my_width);j++) 
+                    fread(&pixels[i][j],sizeof(unsigned char),1,file);
+
             if(pixels != NULL) {
                 printf("Loaded %s\n",file_name);
                 *no_image_loaded=0;
-            }
+            }     
             
             // Modify the dimensions
             *width = my_width*3;
