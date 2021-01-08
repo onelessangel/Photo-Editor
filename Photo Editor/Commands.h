@@ -34,7 +34,7 @@ void SEPIA(int *, int *, int *, int *, unsigned char ***, int *, const int);
 
 // This function saves the current image to a file in the specified format.
 void SAVE(const char *, unsigned char **, int, const int, const int,
-const char *, int, int, int, int, int);
+const char *, int, int, int, int, int,int*);
 
 // This function closes the program and frees the memory.
 void EXIT(unsigned char ***, const int);
