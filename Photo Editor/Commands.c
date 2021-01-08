@@ -886,7 +886,7 @@ int x1,int y1,int x2,int y2) {
 			fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
 
 			for (int i = x1; i < x2; i++)
-				for (int j = y1; j < y2 * 3; j++)
+				for (int j = y1; j < y2; j++)
 					fwrite(&image[i][j], sizeof(unsigned char), 1, new_file);
 
 			if (fclose(new_file) == EOF)
@@ -911,7 +911,7 @@ int x1,int y1,int x2,int y2) {
 				fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
 
 				for (int i = x1; i < x2; i++)
-					for (int j = y1; j < y2 * 3; j++)
+					for (int j = y1; j < y2; j++)
 						fwrite(&image[i][j], sizeof(unsigned char), 1, new_file);
 
 				if (fclose(new_file) == EOF)
@@ -947,8 +947,8 @@ int x1,int y1,int x2,int y2) {
 				fprintf(new_file, "%s\n", Px);
 				fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
 
-				for (int i = 0; i < height; i++) {
-					for (int j = 0; j < width* 3; j++)
+				for (int i = x1; i < x2; i++) {
+					for (int j = y1; j < y2; j++)
 						fprintf(new_file, "%hhu ", image[i][j]);
 					fprintf(new_file, "\n");
 				}
@@ -982,7 +982,7 @@ int x1,int y1,int x2,int y2) {
 				fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
 
 				for (int i = x1; i < x2; i++) {
-					for (int j = y1; j < y2 * 3; j++)
+					for (int j = y1; j < y2 ; j++)
 						fprintf(new_file, "%hhu ", image[i][j]);
 					fprintf(new_file, "\n");
 				}
