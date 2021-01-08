@@ -201,7 +201,7 @@ int *y1, int *x2, int *y2, int *color_image, int *my_image_max, char *type) {
 // This function selects a part of the area.
 void SELECT(int *x1, int *y1, int *x2, int *y2, int *width, int *height,
 int *correct) {
-
+	
 	// Check if the coordinates are valid
 	if (*x1 < 0 || *x2 < 0 || *y1 < 0 || *y2 < 0)
 		printf("Invalid coordinates\n");
@@ -729,11 +729,11 @@ const int color_image,int* cropped,int* has_been_cropped) {
 
 	if (color_image == 0) {
 		*height = *x2 - *x1;
-
 		*width = *y2 - *y1;
+
 	} else if (color_image == 1) {
 		*height = *x2 - *x1;
-		*width = (*y2 - *y1) * 3;
+		*width = (*y2 - *y1)*3;
 	}
 	*cropped=1;
 	*has_been_cropped=1;
@@ -857,7 +857,7 @@ const int my_image_max, const int color_image) {
 // This function saves the current image to a file in the specified format.
 void SAVE(const char *file_name, unsigned char **image, int width,
 const int height, const int binary, const char type, int my_image_max,
-int x1,int y1,int x2,int y2) {
+int x1,int y1,int x2,int y2,int* cropped) {
 	
 	FILE *new_file;
 
@@ -942,10 +942,22 @@ int x1,int y1,int x2,int y2) {
 					return;
 
 			} else if (type == '3') {
+
 				char Px[2] = "P3";
-				width = width / 3;
+
+				printf("Am primit width:%d x1:%d y1:%d x2:%d y2:%d",width,x1,y1,x2,y2);
+
 				fprintf(new_file, "%s\n", Px);
-				fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
+
+				if(*cropped == 0)
+					fprintf(new_file, "%d %d\n%d\n", y2/3, x2, my_image_max);
+				else if(*cropped == 1 && y2*3 == width)
+						fprintf(new_file, "%d %d\n%d\n", y2/3, x2, my_image_max);
+				else{
+					printf("CAZ 3");
+					fprintf(new_file, "%d %d\n%d\n", y2, x2, my_image_max); 
+				}
+			
 
 				for (int i = x1; i < x2; i++) {
 					for (int j = y1; j < y2; j++)
@@ -954,7 +966,7 @@ int x1,int y1,int x2,int y2) {
 				}
 				fseek(new_file, -1, SEEK_END);
 				getc(new_file);
-
+				y2/=3;
 				if (fclose(new_file) == EOF)
 					return;
 			}
@@ -1051,10 +1063,18 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 					SELECT(&replace1, &replace2, &replace3, &replace4, width,
 							height, correct);
 					if (*correct == 1) {
-						*y1 = replace1 + *px1;
-						*x1 = replace2 + *py1;
-						*y2 = replace3 + *px1;
-						*x2 = replace4 + *py1;
+						if(*color_image==0) {
+							*y1 = replace1 + *px1;
+							*x1 = replace2 + *py1;
+							*y2 = replace3 + *px1;
+							*x2 = replace4 + *py1;
+						}
+						else {
+							*y1 = replace1 *3 + *px1;
+							*x1 = replace2 + *py1;
+							*y2 = replace3 *3 + *px1;
+							*x2 = replace4 + *py1;
+						}
 					}
 				} else {
 					printf("No image loaded\n");
@@ -1119,10 +1139,13 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 			if (*image_status == UPP) {
 				CROP(x1, y1, x2, y2, width, height, *color_image,cropped,
 				has_been_cropped);
-			*px1=*x1;
-			*py1=*y1;
-			*px2=*x2;
-			*py2=*y2;
+	
+				*px1=*x1;
+				*py1=*y1;
+				*px2=*x2;
+				*py2=*y2;
+			
+			
 			}
 			else {
 				printf("No image cropped\n");
@@ -1168,7 +1191,7 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 
 			if (*image_status == UPP) {
 				SAVE(new_file, *image, *width, *height, binary, *type,
-				*my_image_max,*px1,*py1,*px2,*py2);
+				*my_image_max,*px1,*py1,*px2,*py2,cropped);
 			} else {
 				printf("No image loaded\n");
 			}
