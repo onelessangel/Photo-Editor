@@ -229,13 +229,18 @@ int *correct) {
 }
 
 // This function selects the whole area.
-void SELECT_ALL(int *width, int *height, int *x1, int *y1, int *x2, int *y2) {
+void SELECT_ALL(int *width, int *height, int *x1, int *y1, int *x2, int *y2,int has_been_cropped) {
 
-	*x1 = 0;
-	*y1 = 0;
-	*x2 = *height;
-	*y2 = *width;
-
+	if(!has_been_cropped) {
+		*x1 = 0;
+		*y1 = 0;
+		*x2 = *height;
+		*y2 = *width;
+	}
+	else if(has_been_cropped){
+		*x2 = *x1+*height;
+		*y2 = *y1+*width;
+	}
 	printf("Selected ALL\n");
 }
 
@@ -660,7 +665,7 @@ const int color_image) {
 
 // This function crops the image.
 void CROP(int *x1, int *y1, int *x2, int *y2, int *width, int *height,
-const int color_image,int* cropped) {
+const int color_image,int* cropped,int* has_been_cropped) {
 
 	if (color_image == 0) {
 		*height = *x2 - *x1;
@@ -670,6 +675,7 @@ const int color_image,int* cropped) {
 		*width = (*y2 - *y1) * 3;
 	}
 	*cropped=1;
+	*has_been_cropped=1;
 	printf("Image cropped\n");
 }
 
@@ -790,174 +796,40 @@ const int my_image_max, const int color_image) {
 // This function saves the current image to a file in the specified format.
 void SAVE(const char *file_name, unsigned char **image, int width,
 const int height, const int binary, const char type, int my_image_max,
-int x1,int y1,int x2,int y2,int* cropped) {
+int x1,int y1,int x2,int y2) {
 	
 	FILE *new_file;
-	if(*cropped ==0) {
-		// Save in binary mode
-		if (binary == 1) {
-			new_file = fopen(file_name, "wb");
-			if (new_file == NULL)
+
+	// Save in binary mode
+	if (binary == 1) {
+		new_file = fopen(file_name, "wb");
+		if (new_file == NULL)
+			return;
+
+		if (type == '5') {
+			char Px[2] = "P5";
+			fprintf(new_file, "%s\n", Px);
+			fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
+
+			for (int i = x1; i < x2; i++)
+				for (int j = y1; j < y2; j++)
+					fwrite(&image[i][j], sizeof(unsigned char), 1, new_file);
+
+			if (fclose(new_file) == EOF)
 				return;
 
-			if (type == '5') {
-				char Px[2] = "P5";
-				fprintf(new_file, "%s\n", Px);
-				fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
+		} else if (type == '6') {
+			width = width / 3;
+			char Px[2] = "P6";
+			fprintf(new_file, "%s\n", Px);
+			fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
 
-				for (int i = 0; i < height; i++)
-					for (int j = 0; j < width; j++)
-						fwrite(&image[i][j], sizeof(unsigned char), 1, new_file);
+			for (int i = x1; i < x2; i++)
+				for (int j = y1; j < y2 * 3; j++)
+					fwrite(&image[i][j], sizeof(unsigned char), 1, new_file);
 
-				if (fclose(new_file) == EOF)
-					return;
-
-			} else if (type == '6') {
-				width = width / 3;
-				char Px[2] = "P6";
-				fprintf(new_file, "%s\n", Px);
-				fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
-
-				for (int i = 0; i < height; i++)
-					for (int j = 0; j < width * 3; j++)
-						fwrite(&image[i][j], sizeof(unsigned char), 1, new_file);
-
-				if (fclose(new_file) == EOF)
-					return;
-
-			} else if (type == '2') {
-				char Px[2] = "P5";
-				fprintf(new_file, "%s\n", Px);
-				fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
-
-				for (int i = 0; i < height; i++)
-					for (int j = 0; j < width; j++)
-						fwrite(&image[i][j], sizeof(unsigned char), 1, new_file);
-
-				if (fclose(new_file) == EOF)
-					return;
-
-			} else if (type == '3') {
-				width = width / 3;
-				char Px[2] = "P6";
-				fprintf(new_file, "%s\n", Px);
-				fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
-
-				for (int i = 0; i < height; i++)
-					for (int j = 0; j < width * 3; j++)
-						fwrite(&image[i][j], sizeof(unsigned char), 1, new_file);
-
-				if (fclose(new_file) == EOF)
-					return;
-			}
-		}
-		
-
-		// Save in ascii mode
-		else if (binary == 0) {
-			new_file = fopen(file_name, "wt");
-			if (new_file == NULL)
+			if (fclose(new_file) == EOF)
 				return;
-
-			if (type == '2') {
-				char Px[2] = "P2";
-				fprintf(new_file, "%s\n", Px);
-				fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
-
-				for (int i = 0; i < height; i++) {
-					for (int j = 0; j < width; j++)
-						fprintf(new_file, "%hhu ", image[i][j]);
-					fprintf(new_file, "\n");
-				}
-
-				if (fclose(new_file) == EOF)
-					return;
-
-			} else if (type == '3') {
-				char Px[2] = "P3";
-				width = width / 3;
-				fprintf(new_file, "%s\n", Px);
-				fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
-
-				for (int i = 0; i < height; i++) {
-					for (int j = 0; j < width * 3; j++)
-						fprintf(new_file, "%hhu ", image[i][j]);
-					fprintf(new_file, "\n");
-				}
-				fseek(new_file, -1, SEEK_END);
-				getc(new_file);
-
-				if (fclose(new_file) == EOF)
-					return;
-			}
-
-			else if (type == '5') {
-				char Px[2] = "P2";
-				fprintf(new_file, "%s\n", Px);
-				fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
-
-				for (int i = 0; i < height; i++) {
-					for (int j = 0; j < width; j++)
-						fprintf(new_file, "%hhu ", image[i][j]);
-					fprintf(new_file, "\n");
-				}
-
-				if (fclose(new_file) == EOF)
-					return;
-
-			}
-
-			else if (type == '6') {
-				char Px[2] = "P3";
-				width = width / 3;
-				fprintf(new_file, "%s\n", Px);
-				fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
-
-				for (int i = 0; i < height; i++) {
-					for (int j = 0; j < width * 3; j++)
-						fprintf(new_file, "%hhu ", image[i][j]);
-					fprintf(new_file, "\n");
-				}
-				fseek(new_file, -1, SEEK_END);
-				getc(new_file);
-
-				if (fclose(new_file) == EOF)
-					return;
-			}
-		}
-	}
-	else if(*cropped ==1) {
-
-		// Save in binary mode
-		if (binary == 1) {
-			new_file = fopen(file_name, "wb");
-			if (new_file == NULL)
-				return;
-
-			if (type == '5') {
-				char Px[2] = "P5";
-				fprintf(new_file, "%s\n", Px);
-				fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
-
-				for (int i = x1; i < x2; i++)
-					for (int j = y1; j < y2; j++)
-						fwrite(&image[i][j], sizeof(unsigned char), 1, new_file);
-
-				if (fclose(new_file) == EOF)
-					return;
-
-			} else if (type == '6') {
-				width = width / 3;
-				char Px[2] = "P6";
-				fprintf(new_file, "%s\n", Px);
-				fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
-
-				for (int i = x1; i < x2; i++)
-					for (int j = y1; j < y2 * 3; j++)
-						fwrite(&image[i][j], sizeof(unsigned char), 1, new_file);
-
-				if (fclose(new_file) == EOF)
-					return;
 
 			} else if (type == '2') {
 				char Px[2] = "P5";
@@ -988,7 +860,6 @@ int x1,int y1,int x2,int y2,int* cropped) {
 
 		}
 		
-
 		// Save in ascii mode
 		else if (binary == 0) {
 			new_file = fopen(file_name, "wt");
@@ -1060,9 +931,7 @@ int x1,int y1,int x2,int y2,int* cropped) {
 				if (fclose(new_file) == EOF)
 					return;
 			}
-		}
 
-		*cropped=0;
 	}
 	printf("Saved %s\n", file_name);
 }
@@ -1078,7 +947,8 @@ void EXIT(unsigned char ***image, const int height) {
 void check_command(int command_value, int *width, int *height,
 int *image_status, int *x1, int *y1, int *x2, int *y2,
 unsigned char ***image, char **input, int *color_image, char *type,
-int *my_image_max, int *whole_map_selected, int *correct, int *cropped) {
+int *my_image_max, int *whole_map_selected, int *correct, int *cropped,
+int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
     
 	// Declare variables
 	char *file_name = (char *)malloc(NAME_LENGTH_MAX * sizeof(char));
@@ -1099,7 +969,10 @@ int *my_image_max, int *whole_map_selected, int *correct, int *cropped) {
 			// Load the image in a dynamic matrix
 			*image = LOAD(file_name, width, height, x1, y1, x2, y2, color_image,
 					my_image_max, type);
-
+			*px1=*x1;
+			*py1=*y1;
+			*px2=*x2;
+			*py2=*y2;
 			// Check image status
 			if (*image != NULL)
 				*image_status = UPP;
@@ -1117,10 +990,10 @@ int *my_image_max, int *whole_map_selected, int *correct, int *cropped) {
 					SELECT(&replace1, &replace2, &replace3, &replace4, width,
 							height, correct);
 					if (*correct == 1) {
-						*y1 = replace1;
-						*x1 = replace2;
-						*y2 = replace3;
-						*x2 = replace4;
+						*y1 = replace1 + *px1;
+						*x1 = replace2 + *py1;
+						*y2 = replace3 + *px1;
+						*x2 = replace4 + *py1;
 					}
 				} else {
 					printf("No image loaded\n");
@@ -1135,7 +1008,7 @@ int *my_image_max, int *whole_map_selected, int *correct, int *cropped) {
 		// FUNCTION: SELECT ALL
 		case 2:
 			if (*image_status == UPP)
-				SELECT_ALL(width, height, x1, y1, x2, y2);
+				SELECT_ALL(width, height, x1, y1, x2, y2,*has_been_cropped);
 			else {
 				printf("No image loaded\n");
 			}
@@ -1183,8 +1056,14 @@ int *my_image_max, int *whole_map_selected, int *correct, int *cropped) {
 
 		// FUNCTION: CROP
 		case 4:
-			if (*image_status == UPP)
-				CROP(x1, y1, x2, y2, width, height, *color_image,cropped);
+			if (*image_status == UPP) {
+				CROP(x1, y1, x2, y2, width, height, *color_image,cropped,
+				has_been_cropped);
+			*px1=*x1;
+			*py1=*y1;
+			*px2=*x2;
+			*py2=*y2;
+			}
 			else {
 				printf("No image cropped\n");
 			}
@@ -1229,7 +1108,7 @@ int *my_image_max, int *whole_map_selected, int *correct, int *cropped) {
 
 			if (*image_status == UPP) {
 				SAVE(new_file, *image, *width, *height, binary, *type,
-				*my_image_max,*x1,*y1,*x2,*y2,cropped);
+				*my_image_max,*px1,*py1,*px2,*py2);
 			} else {
 				printf("No image loaded\n");
 			}
