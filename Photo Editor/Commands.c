@@ -254,39 +254,99 @@ const int color_image) {
 	if (!whole_map_selected) {
 
 		if (color_image == 0) {
-
-			// Create a copy of the current selection
-			unsigned char **pixels =
-				copy_pixels_selection(*x1, *y1, *x2, *y2, image);
-			if (pixels == NULL)
-				return;
-
+	
 			// Rotate to 90/-270 degrees
 			if (angle == 90 || angle == -270) {
-				for (int i = 0; i < (*x2 - *x1); i++)
-					for (int j = 0; j < (*y2 - *y1); j++)
-						(*image)[*x1 + i][*y1 + j] =
-								pixels[*x2 - 1 - j][*y1 + i];
+
+				// Get the minimum square matrix necessary
+				int new_height = (*x2-*x1);
+				int new_width = (*y2-*y1);
+				int max_size = new_height;
+				if (max_size < new_width)
+					max_size = new_width;
+
+				// Memory allocation for rotation
+				unsigned char **pixels = (unsigned char **)calloc(
+						max_size, sizeof(unsigned char *));
+				for (int i = 0; i < max_size; i++)
+					pixels[i] = (unsigned char *)calloc(
+							max_size, sizeof(unsigned char));
+
+				// Copy values in the clone matrix
+				for(int i=0;i<new_height;i++)
+					for(int j=0;j<new_width;j++)
+						pixels[i][j]=(*image)[*x2-1-i][*y1+j];
+		
+				// Save changes accordingly
+				for (int i = 0; i < new_width; i++) 
+					for (int j = 0; j < new_height; j++) 
+						(*image)[*x1+j][*y1+i]=pixels[i][j];
+					
+				free_pixels((*x2 - *x1), &pixels);
+
 			}
 
 			// Rotate to 180/-180 degrees
 			else if (angle == 180 || angle == -180) {
-				for (int i = 0; i < (*x2 - *x1); i++)
-					for (int j = 0; j < (*y2 - *y1); j++)
-						(*image)[*x1 + i][*y1 + j] =
-								pixels[*x2 - 1 - i][*y2 - 1 - j];
+
+				// Get the minimum square matrix necessary
+				int max_size = (*y2-*y1);
+				if (max_size < (*x2 - *x1))
+					max_size = (*x2 - *x1);
+
+				// Memory allocation for rotation
+				unsigned char **pixels = (unsigned char **)malloc(
+						max_size * sizeof(unsigned char *));
+				for (int i = 0; i < max_size; i++)
+					pixels[i] = (unsigned char *)malloc(
+							max_size * sizeof(unsigned char));
+
+				// Copy values in the matrix copy
+				for (int i = 0; i < (*x2 - *x1); i++) {
+					for (int j = 0; j < (*y2-*y1); j++) {
+						pixels[i][j] = (*image)[*x1+i][*y1+j];
+					}
+				}
+
+				// Put the correct values in the original matrix
+				for (int i = 0; i < (*y2-*y1); i++) 
+					for (int j = 0; j < (*x2 - *x1); j++) 
+						(*image)[*x1+i][*y1+j]=pixels[(*x2 - *x1)-1-i][(*y2-*y1)-1-j];
+
+				// Free the matrix copy
+				free_pixels(max_size, &pixels);
 			}
 
-			// Rotate to 270/-90 degrees
-			else if (angle == 270 || angle == -90) {
-				for (int i = 0; i < (*x2 - *x1); i++)
-					for (int j = 0; j < (*y2 - *y1); j++)
-						(*image)[*x2 - 1 - j][*y1 + i] =
-								pixels[*x1 + i][*y1 + j];
-			}
+			// Rotate to -90/270 degrees
+			else if (angle == -90 || angle == 270) {
 
-			// Free the matrix copy
-			free_pixels((*x2 - *x1), &pixels);
+				// Get the minimum square matrix necessary
+				int new_height = (*x2-*x1);
+				int new_width = (*y2-*y1);
+				int max_size = new_height;
+				if (max_size < new_width)
+					max_size = new_width;
+
+				// Memory allocation for rotation
+				unsigned char **pixels = (unsigned char **)calloc(
+						max_size, sizeof(unsigned char *));
+				for (int i = 0; i < max_size; i++)
+					pixels[i] = (unsigned char *)calloc(
+							max_size, sizeof(unsigned char));
+
+				// Copy values in the clone matrix
+				for(int i=0;i<new_height;i++)
+					for(int j=0;j<new_width;j++)
+						pixels[i][j]=(*image)[*x1+i][*y1+j];
+		
+				// Save changes accordingly
+				for (int i = 0; i < new_width; i++) 
+					for (int j = 0; j < new_height; j++) 
+						(*image)[*x1+i][*y1+j]=pixels[j][new_width-1-i];
+					
+				free_pixels((*x2 - *x1), &pixels);
+
+			}
 		}
 
 		else if (color_image == 1) {
@@ -669,6 +729,7 @@ const int color_image,int* cropped,int* has_been_cropped) {
 
 	if (color_image == 0) {
 		*height = *x2 - *x1;
+
 		*width = *y2 - *y1;
 	} else if (color_image == 1) {
 		*height = *x2 - *x1;
@@ -886,8 +947,8 @@ int x1,int y1,int x2,int y2) {
 				fprintf(new_file, "%s\n", Px);
 				fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
 
-				for (int i = x1; i < x2; i++) {
-					for (int j = y1; j < y2 * 3; j++)
+				for (int i = 0; i < height; i++) {
+					for (int j = 0; j < width* 3; j++)
 						fprintf(new_file, "%hhu ", image[i][j]);
 					fprintf(new_file, "\n");
 				}
@@ -1042,7 +1103,6 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 							*whole_map_selected=0;
 						}
 						
-						printf("I will rotate with %d %d %d %d %d %d",*x1,*y1,*x2,*y2,*width,*height);
 						ROTATE(angle, image, x1, y1, x2, y2,
 								*whole_map_selected, width, height,
 								*color_image);
