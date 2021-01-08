@@ -21,7 +21,7 @@ void ROTATE(const int, unsigned char ***, int *, int *, int *, int *, const int,
 int *, int *, const int);
 
 // This function crops the image.
-void CROP(int *, int *, int *, int *, int *, int *, const int);
+void CROP(int *, int *, int *, int *, int *, int *, const int,int*);
 
 // This function will turn the image to grayscale format.
 void GRAYSCALE(int *, int *, int *, int *, unsigned char ***, const int);
@@ -34,7 +34,7 @@ void SEPIA(int *, int *, int *, int *, unsigned char ***, int *, const int);
 
 // This function saves the current image to a file in the specified format.
 void SAVE(const char *, unsigned char **, int, const int, const int,
-const char *, int);
+const char *, int, int, int, int, int,int*);
 
 // This function closes the program and frees the memory.
 void EXIT(unsigned char ***, const int);
@@ -42,7 +42,7 @@ void EXIT(unsigned char ***, const int);
 // This functions checks if an valid command has been received
 // and, if true, executes the corresponding function.
 void check_command(const int, int *, int *, int *, int *, int *, int *, int *,
-unsigned char ***, char **, int *, char *, int *, int *, int *);
+unsigned char ***, char **, int *, char *, int *, int *, int *,int*);
 
 // Exit status
 enum {
