@@ -82,6 +82,7 @@ int *y1, int *x2, int *y2, int *color_image, int *my_image_max, char *type) {
 		*y2 = (my_image.width * 3);
 		*color_image = 1;
 		*type = '3';
+
 		// Close file
 		if (fclose(file) == EOF)
 			return (unsigned char **)FILE_CLOSE_ERROR;
@@ -202,46 +203,63 @@ int *y1, int *x2, int *y2, int *color_image, int *my_image_max, char *type) {
 void SELECT(int *x1, int *y1, int *x2, int *y2, int *width, int *height,
 int *correct) {
 	
-	// Check if the coordinates are valid
-	if (*x1 < 0 || *x2 < 0 || *y1 < 0 || *y2 < 0)
-		printf("Invalid coordinates\n");
-	else if (*x1 > *width || *x2 > *width)
-		printf("Invalid coordinates\n");
-	else if (*y1 > *height || *y2 > *height)
-		printf("Invalid coordinates\n");
-	else {
-		printf("Selected %d %d %d %d\n", *x1, *y1, *x2, *y2);
-		*correct = 1;
-	}
+		// Check if the coordinates are valid
+		if (*x1 < 0 || *x2 < 0 || *y1 < 0 || *y2 < 0) {
+			printf("Invalid coordinates\n");
+			*correct=0;
+			return;
+			}
+		else if (*x1 > *width || *x2 > *width) {
+			printf("Invalid coordinates\n");
+			*correct=0;
+			return;
+		}
+		else if (*y1 > *height || *y2 > *height) {
+			printf("Invalid coordinates\n");
+			*correct=0;
+			return;
+		}
+		else {
+			printf("Selected %d %d %d %d\n", *x1, *y1, *x2, *y2);
 
-	// Keep the width and height coordinates in ascending order
-	int aux;
-	if (*x1 > *x2) {
-		aux = *x1;
-		*x1 = *x2;
-		*x2 = aux;
-	}
-	if (*y1 > *y2) {
-		aux = *y2;
-		*y1 = *y2;
-		*y2 = aux;
-	}
+			// Keep the width and height coordinates in ascending order
+			int aux;
+			if (*x1 > *x2) {
+				aux = *x1;
+				*x1 = *x2;
+				*x2 = aux;
+			}
+			if (*y1 > *y2) {
+				aux = *y2;
+				*y1 = *y2;
+				*y2 = aux;
+			}
+			*correct = 1;
+		}
+	
 }
 
 // This function selects the whole area.
-void SELECT_ALL(int *width, int *height, int *x1, int *y1, int *x2, int *y2,int has_been_cropped) {
-
+void SELECT_ALL(int *width, int *height, int *x1, int *y1, int *x2, int *y2,int has_been_cropped,int* px1, int* py1) {
+	printf("Am intrat cu %d %d %d %d %d %d\n",*width,*height,*x1,*y1,*x2,*y2);
 	if(!has_been_cropped) {
 		*x1 = 0;
 		*y1 = 0;
 		*x2 = *height;
 		*y2 = *width;
+		printf("Selected ALL\n");
+		return;
 	}
 	else if(has_been_cropped){
-		*x2 = *x1+*height;
-		*y2 = *y1+*width;
+		printf("Am intrat in select all cu %d %d %d %d %d %d\n",*width,*height,*x1,*y1,*x2,*y2);
+		*x2 = *px1+*height;
+		*y2 = *py1+*width;
+		*x1 = *px1;
+		*y1 = *py1;
+		printf("Selected ALL\n");
+		return;
 	}
-	printf("Selected ALL\n");
+	
 }
 
 // This function rotates the image or a selection of pixels from the image by a
@@ -350,22 +368,22 @@ const int color_image) {
 		}
 
 		else if (color_image == 1) {
-		
+			
 			// Rotate to 90/-270 degrees
 			if (angle == 90 || angle == -270) {
-
+			
 				// Get the minimum square matrix necessary
-				int new_height = (*x2-*x1);
-				int new_width = (*y2-*y1) * 3;
+				int new_height = (*y2-*y1)/ 3;
+				int new_width = (*x2-*x1) * 3;
 				int max_size = new_height;
 				if (max_size < new_width)
 					max_size = new_width;
 
 				// Memory allocation for rotation
-				unsigned char **pixels = (unsigned char **)calloc(
+				unsigned char **pixel_matrix = (unsigned char **)calloc(
 						max_size, sizeof(unsigned char *));
 				for (int i = 0; i < max_size; i++)
-					pixels[i] = (unsigned char *)calloc(
+					pixel_matrix[i] = (unsigned char *)calloc(
 							max_size, sizeof(unsigned char));
 
 				// Copy values in the clone matrix
@@ -376,7 +394,7 @@ const int color_image) {
 					k = keep_pos;
 
 					for (int j = 0; j < new_width; j++) {
-						pixels[i][j] = (*image)[p][k];
+						pixel_matrix[i][j] = (*image)[*x1+p][*y1+k];
 						k++;
 
 						if (k == (keep_pos + 3)) {
@@ -387,44 +405,43 @@ const int color_image) {
 					keep_pos += 3;
 				}
 
-				// Save changes accordingly
-				for (int i = 0; i < new_height; i++) 
-					for (int j = 0; j < new_width; j++) 
-						(*image)[*x1+i][*y1+j]=pixels[i][j];
-					
-				free_pixels((*x2 - *x1), &pixels);
+				for(int i=0;i<new_height;i++)
+					for(int j=0;j<new_width;j++)
+						(*image)[*x1+i][*y1+j]=pixel_matrix[i][j];
 
+				free_pixels(max_size,&pixel_matrix);
 			}
 
 			// Rotate to 180/-180 degrees
 			else if (angle == 180 || angle == -180) {
 
 				// Get the minimum square matrix necessary
-				int max_size = (*y2-*y1)*3;
-				if (max_size < (*x2 - *x1))
-					max_size = (*x2 - *x1);
+				int max_size = (*x2-*x1);
+				if (max_size < (*y2-*y1))
+					max_size = (*y2-*y1);
 
 				// Memory allocation for rotation
-				unsigned char **pixels = (unsigned char **)malloc(
+				unsigned char **pixel_matrix = (unsigned char **)malloc(
 						max_size * sizeof(unsigned char *));
 				for (int i = 0; i < max_size; i++)
-					pixels[i] = (unsigned char *)malloc(
+					pixel_matrix[i] = (unsigned char *)malloc(
 							max_size * sizeof(unsigned char));
 
 				// Copy values in the matrix copy
-				for (int i = 0; i < (*x2 - *x1); i++) {
-					for (int j = 0; j < (*y2-*y1)*3; j++) {
-						pixels[i][j] = (*image)[i][j];
+				for (int i = 0; i < (*x2-*x1); i++) {
+					for (int j = 0; j < (*y2-*y1); j++) {
+						pixel_matrix[i][j] = (*image)[*x1+i][*y1+j];
 					}
 				}
 
 				// Put the correct values in the original matrix
-				int p = (*x2 - *x1) - 1;
-				int k = (*y2-*y1)*3 - 3;
-				int limit = (*y2-*y1)*3;
-				for (int i = 0; i < (*x2 - *x1); i++) {
-					for (int j = 0; j < (*y2-*y1)*3; j++) {
-						(*image)[i][j] = pixels[p][k];
+				int p = (*x2-*x1) - 1;
+				int k = (*y2-*y1) - 3;
+				int limit = (*y2-*y1);
+
+				for (int i = 0; i < (*x2-*x1); i++) {
+					for (int j = 0; j < (*y2-*y1); j++) {
+						(*image)[*x1+i][*y1+j] = pixel_matrix[p][k];
 						k++;
 						if (k == limit) {
 							k = k - 6;
@@ -432,29 +449,29 @@ const int color_image) {
 						}
 					}
 					p--;
-					k = (*y2-*y1)*3 - 3;
-					limit = (*y2-*y1)*3;
+					k = (*y2-*y1) - 3;
+					limit = (*y2-*y1);
 				}
 
 				// Free the matrix copy
-				free_pixels(max_size, &pixels);
+				free_pixels(max_size, &pixel_matrix);
 			}
 
 			// Rotate to -90/270 degrees
 			else if (angle == -90 || angle == 270) {
 
-				 // Get the minimum square matrix necessary
-				int new_height = (*y2-*y1);
+				// Get the minimum square matrix necessary
+				int new_height = (*y2-*y1)/ 3;
 				int new_width = (*x2-*x1) * 3;
 				int max_size = new_height;
 				if (max_size < new_width)
 					max_size = new_width;
 
 				// Memory allocation for rotation
-				unsigned char **pixels = (unsigned char **)calloc(
+				unsigned char **pixel_matrix = (unsigned char **)calloc(
 						max_size, sizeof(unsigned char *));
 				for (int i = 0; i < max_size; i++)
-					pixels[i] = (unsigned char *)calloc(
+					pixel_matrix[i] = (unsigned char *)calloc(
 							max_size, sizeof(unsigned char));
 
 				// Copy values in the clone matrix
@@ -463,7 +480,7 @@ const int color_image) {
 					k = keep_pos;
 					p = 0;
 					for (int j = 0; j < new_width; j++) {
-						pixels[i][j] = (*image)[p][k];
+						pixel_matrix[i][j] = (*image)[*x1+p][*y1+k];
 						k++;
 						if (k == (keep_pos + 3)) {
 							p++;
@@ -473,16 +490,12 @@ const int color_image) {
 					keep_pos += 3;
 				}
 
-				// Save changes accordingly
-				for (int i = 0; i < new_height; i++) 
-					for (int j = 0; j < new_width; j++) 
-						(*image)[*x1+i][*y1+j]=pixels[i][j];
-					
-				free_pixels((*x2 - *x1), &pixels);
+				for(int i=0;i<new_height;i++)
+					for(int j=0;j<new_width;j++)
+						(*image)[*x1+i][*y1+j]=pixel_matrix[i][j];
 
+				free_pixels(max_size,&pixel_matrix);
 			}
-	
-		
 		}
 	}
 
@@ -726,14 +739,14 @@ const int color_image) {
 // This function crops the image.
 void CROP(int *x1, int *y1, int *x2, int *y2, int *width, int *height,
 const int color_image,int* cropped,int* has_been_cropped) {
-
+printf("Am intrat cu %d %d %d %d %d %d\n",*width,*height,*x1,*y1,*x2,*y2);
 	if (color_image == 0) {
 		*height = *x2 - *x1;
 		*width = *y2 - *y1;
 
 	} else if (color_image == 1) {
 		*height = *x2 - *x1;
-		*width = (*y2 - *y1)*3;
+		*width = *y2 - *y1;
 	}
 	*cropped=1;
 	*has_been_cropped=1;
@@ -741,34 +754,27 @@ const int color_image,int* cropped,int* has_been_cropped) {
 }
 
 // This function will turn the image to grayscale format.
-void GRAYSCALE(int *x1, int *y1, int *x2, int *y2, unsigned char ***image,
-const int color_image) {
+void GRAYSCALE(int *x1, int *y1, int *x2, int *y2, unsigned char ***image) {
 
-	double RGB_2_GRAYSCALE = 0.00;
-	int RGB_int;
-	if (color_image == 0) {
-		for (int i = *x1; i < *x2; i++)
-			for (int j = *y1; j < *y2; j = j + 3) {
+	double R, G, B;
+	int R_int, G_int, B_int;
+	for (int i = *x1; i < *x2; i++)
+		for (int j = *y1; j < *y2; j = j + 3) {
 
-				// Formula for RGB
-				RGB_2_GRAYSCALE = ((*image)[i][j] + (*image)[i][j + 1] +
+			// Formula for RGB to GRAYSCALE
+			R = G = B = (double) ((*image)[i][j] + (*image)[i][j + 1] +
 				(*image)[i][j + 2]) / 3.0;
-				RGB_int = round(RGB_2_GRAYSCALE);
-				(*image)[i][j] = (*image)[i][j + 1] = (*image)[i][j + 2] =
-						RGB_int;
-			}
+			R_int = round(R);
+			G_int = round(G);
+			B_int = round(B);
 
-	} else if (color_image == 1) {
-		for (int i = *x1; i < *x2; i++)
-			for (int j = (*y1 * 3); j < (*y2 * 3); j = j + 3) {
-				// Formula for RGB
-				RGB_2_GRAYSCALE = ((*image)[i][j] + (*image)[i][j + 1] +
-				(*image)[i][j + 2]) /3.0;
-				RGB_int = round(RGB_2_GRAYSCALE);
-				(*image)[i][j] = (*image)[i][j + 1] = (*image)[i][j + 2] =
-						RGB_int;
-			}
-	}
+			// Apply the new colors
+			(*image)[i][j] = R_int;
+			(*image)[i][j + 1] = G_int;
+			(*image)[i][j + 2] = B_int;
+		}
+
+
 	printf("Grayscale filter applied\n");
 }
 
@@ -782,74 +788,41 @@ int minimum_value(int first_value, int second_value) {
 
 // This function will turn the image to sepia format.
 void SEPIA(int *x1, int *y1, int *x2, int *y2, unsigned char ***image,
-const int my_image_max, const int color_image) {
+const int my_image_max) {
+
 	double R, G, B;
 	int R_int, G_int, B_int;
 
-	// If the image is not RGB
-	if (color_image == 0) {
-		for (int i = *x1; i < *x2; i++)
-			for (int j = *y1; j < *y2; j = j + 3) {
+	for (int i = *x1; i < *x2; i++)
+		for (int j = *y1; j < *y2; j = j + 3) {
 
-				// Formula for SEPIA red color.
-				R = 0.393 * (*image)[i][j] + 0.769 * (*image)[i][j + 1] +
-					0.189 * (*image)[i][j + 2];
-				R_int = round(R);
-				if (R_int > my_image_max)
-					R_int = minimum_value(R_int, my_image_max);
+			// Formula for SEPIA red color.
+			R = 0.393 * (*image)[i][j] + 0.769 * (*image)[i][j + 1] +
+				0.189 * (*image)[i][j + 2];
+			R_int = round(R);
+			if (R_int > my_image_max)
+				R_int = minimum_value(R_int, my_image_max);
 
-				// Formula for SEPIA green color.
-				G = 0.349 * (*image)[i][j] + 0.686 * (*image)[i][j + 1] +
-					0.168 * (*image)[i][j + 2];
-				G_int = round(G);
-				if (G_int > my_image_max)
-					G_int = minimum_value(G_int, my_image_max);
+			// Formula for SEPIA green color.
+			G = 0.349 * (*image)[i][j] + 0.686 * (*image)[i][j + 1] +
+				0.168 * (*image)[i][j + 2];
+			G_int = round(G);
+			if (G_int > my_image_max)
+				G_int = minimum_value(G_int, my_image_max);
 
-				// Formula for SEPIA blue color.
-				B = 0.272 * (*image)[i][j] + 0.534 * (*image)[i][j + 1] +
-					0.131 * (*image)[i][j + 2];
-				B_int = round(B);
-				if (B_int > my_image_max)
-					B_int = minimum_value(B_int, my_image_max);
+			// Formula for SEPIA blue color.
+			B = 0.272 * (*image)[i][j] + 0.534 * (*image)[i][j + 1] +
+				0.131 * (*image)[i][j + 2];
+			B_int = round(B);
+			if (B_int > my_image_max)
+				B_int = minimum_value(B_int, my_image_max);
 
-				// Apply the new colors
-				(*image)[i][j] = R_int;
-				(*image)[i][j + 1] = G_int;
-				(*image)[i][j + 2] = B_int;
-			}
-
-	// If the image is RGB
-	} else if (color_image == 1) {
-		for (int i = *x1; i < *x2; i++)
-			for (int j = (*y1 * 3); j < (*y2 * 3); j = j + 3) {
-
-				// Formula for SEPIA red color.
-				R = 0.393 * (*image)[i][j] + 0.769 * (*image)[i][j + 1] +
-					0.189 * (*image)[i][j + 2];
-				R_int = round(R);
-				if (R_int > my_image_max)
-					R_int = minimum_value(R_int, my_image_max);
-
-				// Formula for SEPIA green color.
-				G = 0.349 * (*image)[i][j] + 0.686 * (*image)[i][j + 1] +
-					0.168 * (*image)[i][j + 2];
-				G_int = round(G);
-				if (G_int > my_image_max)
-					G_int = minimum_value(G_int, my_image_max);
-
-				// Formula for SEPIA blue color.
-				B = 0.272 * (*image)[i][j] + 0.534 * (*image)[i][j + 1] +
-					0.131 * (*image)[i][j + 2];
-				B_int = round(B);
-				if (B_int > my_image_max)
-					B_int = minimum_value(B_int, my_image_max);
-
-				// Apply the new colors
-				(*image)[i][j] = R_int;
-				(*image)[i][j + 1] = G_int;
-				(*image)[i][j + 2] = B_int;
-			}
-	}
+			// Apply the new colors
+			(*image)[i][j] = R_int;
+			(*image)[i][j + 1] = G_int;
+			(*image)[i][j + 2] = B_int;
+			
+		}
 
 	printf("Sepia filter applied\n");
 }
@@ -857,7 +830,7 @@ const int my_image_max, const int color_image) {
 // This function saves the current image to a file in the specified format.
 void SAVE(const char *file_name, unsigned char **image, int width,
 const int height, const int binary, const char type, int my_image_max,
-int x1,int y1,int x2,int y2,int* cropped) {
+int x1,int y1,int x2,int y2) {
 	
 	FILE *new_file;
 
@@ -880,10 +853,9 @@ int x1,int y1,int x2,int y2,int* cropped) {
 				return;
 
 		} else if (type == '6') {
-			width = width / 3;
 			char Px[2] = "P6";
 			fprintf(new_file, "%s\n", Px);
-			fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
+			fprintf(new_file, "%d %d\n%d\n", width/3, height, my_image_max);
 
 			for (int i = x1; i < x2; i++)
 				for (int j = y1; j < y2; j++)
@@ -905,10 +877,9 @@ int x1,int y1,int x2,int y2,int* cropped) {
 					return;
 
 			} else if (type == '3') {
-				width = width / 3;
 				char Px[2] = "P6";
 				fprintf(new_file, "%s\n", Px);
-				fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
+				fprintf(new_file, "%d %d\n%d\n", width/3, height, my_image_max);
 
 				for (int i = x1; i < x2; i++)
 					for (int j = y1; j < y2; j++)
@@ -918,9 +889,7 @@ int x1,int y1,int x2,int y2,int* cropped) {
 					return;
 			}
 
-
 		}
-		
 		// Save in ascii mode
 		else if (binary == 0) {
 			new_file = fopen(file_name, "wt");
@@ -945,20 +914,9 @@ int x1,int y1,int x2,int y2,int* cropped) {
 
 				char Px[2] = "P3";
 
-				printf("Am primit width:%d x1:%d y1:%d x2:%d y2:%d",width,x1,y1,x2,y2);
-
 				fprintf(new_file, "%s\n", Px);
-
-				if(*cropped == 0)
-					fprintf(new_file, "%d %d\n%d\n", y2/3, x2, my_image_max);
-				else if(*cropped == 1 && y2*3 == width)
-						fprintf(new_file, "%d %d\n%d\n", y2/3, x2, my_image_max);
-				else{
-					printf("CAZ 3");
-					fprintf(new_file, "%d %d\n%d\n", y2, x2, my_image_max); 
-				}
+				fprintf(new_file, "%d %d\n%d\n", width/3, height, my_image_max);
 			
-
 				for (int i = x1; i < x2; i++) {
 					for (int j = y1; j < y2; j++)
 						fprintf(new_file, "%hhu ", image[i][j]);
@@ -966,7 +924,6 @@ int x1,int y1,int x2,int y2,int* cropped) {
 				}
 				fseek(new_file, -1, SEEK_END);
 				getc(new_file);
-				y2/=3;
 				if (fclose(new_file) == EOF)
 					return;
 			}
@@ -984,14 +941,12 @@ int x1,int y1,int x2,int y2,int* cropped) {
 
 				if (fclose(new_file) == EOF)
 					return;
-
 			}
 
 			else if (type == '6') {
 				char Px[2] = "P3";
-				width = width / 3;
 				fprintf(new_file, "%s\n", Px);
-				fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
+				fprintf(new_file, "%d %d\n%d\n", width/3, height, my_image_max);
 
 				for (int i = x1; i < x2; i++) {
 					for (int j = y1; j < y2 ; j++)
@@ -1042,10 +997,13 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 			// Load the image in a dynamic matrix
 			*image = LOAD(file_name, width, height, x1, y1, x2, y2, color_image,
 					my_image_max, type);
+
+			// Keep the starting values of the image for printing reasons
 			*px1=*x1;
 			*py1=*y1;
 			*px2=*x2;
 			*py2=*y2;
+
 			// Check image status
 			if (*image != NULL)
 				*image_status = UPP;
@@ -1057,75 +1015,115 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 
 			// Get the coordinates given by select
 			if ((sscanf(*input, "%s %d %d %d %d", first_command, &replace1,
-						&replace2, &replace3, &replace4)) == 5) {
-				free(first_command);
+				&replace2, &replace3, &replace4)) == 5) {
+			
 				if (*image_status == UPP) {
+					*correct=0;
 					SELECT(&replace1, &replace2, &replace3, &replace4, width,
 							height, correct);
 					if (*correct == 1) {
-						if(*color_image==0) {
+						if(*color_image == 0) {
 							*y1 = replace1 + *px1;
 							*x1 = replace2 + *py1;
 							*y2 = replace3 + *px1;
 							*x2 = replace4 + *py1;
-						}
-						else {
-							*y1 = replace1 *3 + *px1;
-							*x1 = replace2 + *py1;
-							*y2 = replace3 *3 + *px1;
-							*x2 = replace4 + *py1;
+							*correct = 0;
+					}
+						else if(*color_image == 1) {
+							*y1 = (replace1 + *px1)*3;
+							*x1 = replace2 + *py1/3;
+							*y2 = (replace3 + *px1)*3;
+							*x2 = replace4 + *py1/3;
+							*correct = 0;
 						}
 					}
+
 				} else {
 					printf("No image loaded\n");
 				}
 
 			} else {
-				printf("Invalid set of coordinates\n");
+				printf("Invalid set of coordinates %d %d %d %d\n",*x1,*y1,*x2,*y2);
 			}
 
+			printf("\n\nAm iesit din SELECT cu %d %d %d %d %d %d\n",*width,*height,*x1,*y1,*x2,*y2);
 			break;
 
 		// FUNCTION: SELECT ALL
 		case 2:
-			if (*image_status == UPP)
-				SELECT_ALL(width, height, x1, y1, x2, y2,*has_been_cropped);
+			if (*image_status == UPP) {
+				SELECT_ALL(width, height, x1, y1, x2, y2,*has_been_cropped,px1,py1);
+				}
+				
 			else {
 				printf("No image loaded\n");
 			}
+			printf("\n\nAm iesit din SELECT ALL cu %d %d %d %d %d %d----------\n",*width,*height,*x1,*y1,*x2,*y2);
 			break;
 
 		// FUNCTION: ROTATE
 		case 3:
-
+			
 			if (sscanf(*input, "%s %d", first_command, &angle)) {
+				
 				// If the image is loaded execute this. Else display "No image
 				// loaded"
 				if (*image_status == UPP) {
-					// Check for valid angle
-					if (angle != 90 && angle != -90 && angle != 180 &&
-							angle != -180 && angle != 270 && angle != -270) {
-						printf("Unsupported rotation angle\n");
+						
+					if(*color_image == 0) {
+							
+						// Check for valid angle
+						if (angle != 90 && angle != -90 && angle != 180 &&
+								angle != -180 && angle != 270 && angle != -270) {
+							printf("Unsupported rotation angle\n");
+							
+						}
+
+						// Check if the coordinates form a square image
+						else if ((*x2 - *x1) != (*y2 - *y1))
+							printf("The selection must be square\n");
+
+						 else {
+							//  Check if the coordinates form the whole image
+							if (*x1 == 0 && *y1 == 0 && *x2 == *height &&
+									*y2 == *width)
+								*whole_map_selected = 1;
+							else
+							{
+								*whole_map_selected=0;
+							}
+							
+							ROTATE(angle, image, x1, y1, x2, y2,
+									*whole_map_selected, width, height,*color_image);
+						}
 					}
 
-					// Check if the coordinates form a square image
-					else if (((*x2 - *x1) != (*y2 - *y1)) &&
-							 (*x1 != 0 || *y1 != 0 || *x2 != *height ||
-									 *y2 != *width)) {
-						printf("The selection must be square\n");
-					} else {
-						//  Check if the coordinates form the whole image
-						if (*x1 == 0 && *y1 == 0 && *x2 == *height &&
-								*y2 == *width)
-							*whole_map_selected = 1;
-						else
-						{
-							*whole_map_selected=0;
+					else if(*color_image == 1) {
+
+						// Check for valid angle
+						if (angle != 90 && angle != -90 && angle != 180 &&
+								angle != -180 && angle != 270 && angle != -270) {
+							printf("Unsupported rotation angle\n");
 						}
-						
-						ROTATE(angle, image, x1, y1, x2, y2,
-								*whole_map_selected, width, height,
-								*color_image);
+
+						// Check if the coordinates form a square image
+						else if ((*x2 - *x1) != (*y2 - *y1) && (*x2 - *x1) != ((*y2 - *y1)/3)) {
+							printf("The selection must be square\n");
+
+						} else {
+
+							//  Check if the coordinates form the whole image
+							if (*x1 == 0 && *y1 == 0 && *x2 == *height &&
+									*y2 == *width)
+								*whole_map_selected = 1;
+							else
+							{
+								*whole_map_selected=0;
+							}
+							
+							ROTATE(angle, image, x1, y1, x2, y2,
+									*whole_map_selected, width, height,*color_image);
+						}
 					}
 
 				} else {
@@ -1150,15 +1148,16 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 			else {
 				printf("No image cropped\n");
 			}
-
+			printf("\n\nAm iesit din CROP cu %d %d %d %d %d %d----------\n",*width,*height,*x1,*y1,*x2,*y2);
 			break;
 
 		// FUNCTION: GREYSCALE
 		case 5:
 			if (*image_status == UPP) {
+
 				// Apply GRAYSCALE filter only if the image is a color one
 				if (*color_image == 1)
-					GRAYSCALE(x1, y1, x2, y2, image, *color_image);
+					GRAYSCALE(x1, y1, x2, y2, image);
 				else
 					printf("Grayscale filter not available\n");
 			} else {
@@ -1169,9 +1168,10 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 		// FUNCTION: SEPIA
 		case 6:
 			if (*image_status == UPP) {
+
 				// Apply SEPIA filter only if the image is a color one
 				if (*color_image == 1)
-					SEPIA(x1, y1, x2, y2, image, *my_image_max, *color_image);
+					SEPIA(x1, y1, x2, y2, image, *my_image_max);
 				else
 					printf("Sepia filter not available\n");
 			} else {
@@ -1191,7 +1191,7 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 
 			if (*image_status == UPP) {
 				SAVE(new_file, *image, *width, *height, binary, *type,
-				*my_image_max,*px1,*py1,*px2,*py2,cropped);
+				*my_image_max,*px1,*py1,*px2,*py2);
 			} else {
 				printf("No image loaded\n");
 			}
@@ -1199,7 +1199,13 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 
 		// FUNCTION: EXIT
 		case 8:
-			EXIT(image, *height);
+
+			if (*image_status == UPP) {
+				EXIT(image, *height);
+			} else {
+				printf("No image loaded\n");
+			}
+			
 			break;
 
 		// NO RECOGNIZED FUNCTION: "INVALID COMMAND"
