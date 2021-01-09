@@ -74,7 +74,7 @@ const int my_image_width, const int my_image_height, FILE *file) {
 unsigned char **copy_pixels_selection(const int x1, const int y1, const int x2,
 const int y2, unsigned char ***image) {
 
-	// find the width and the height of the image
+	// Find the width and the height of the image
 	int my_image_width = y2 - y1;
 	int my_image_height = x2 - x1;
 
