@@ -1,10 +1,10 @@
-# Text-based-User-Interface-PhotoEditor
+# Photo Editor
 
 Chelcea Claudiu Marian
 
 Contact at: claudiuchelcea01@gmail.com
 
-I created a text editor that supports performing a set of operations over PPM (portable pixmap format) -RGB- and PGM (portable graymap format) -GRAYSCALE- image file formats, both as plain (ASCII) text or binary files.
+I created a photo editor that receives text commands and supports performing a set of operations over PPM (portable pixmap format) -RGB- and PGM (portable graymap format) -GRAYSCALE- image file formats, both as plain (ASCII) text or binary files.
 
 |        TYPE        |        ASCII        |        BINARY       |               COLORS                |
 | ------------------ | ------------------- | ------------------- | ----------------------------------- |
