@@ -2,9 +2,9 @@
 
 # compiler setup
 CC=gcc
-CFLAGS=-Wall -Wextra
+CFLAGS=-Wall -Wextra -lm
 OBJ=Program.o Commands.o Memory.o
-NAME=app
+NAME=image_editor
 
 # define targets
 TARGETS=Program Commands Memory link_objects
@@ -21,6 +21,7 @@ Commands: Commands.c
 
 Memory: Memory.c
 	$(CC) $(CFLAGS) -c Memory.c
+
 
 # link the files, create executable
 link_objects: Program.o Commands.o Memory.o
