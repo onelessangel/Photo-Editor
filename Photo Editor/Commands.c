@@ -241,7 +241,7 @@ int *correct) {
 
 // This function selects the whole area.
 void SELECT_ALL(int *width, int *height, int *x1, int *y1, int *x2, int *y2,int has_been_cropped,int* px1, int* py1) {
-	printf("Am intrat cu %d %d %d %d %d %d\n",*width,*height,*x1,*y1,*x2,*y2);
+
 	if(!has_been_cropped) {
 		*x1 = 0;
 		*y1 = 0;
@@ -251,7 +251,6 @@ void SELECT_ALL(int *width, int *height, int *x1, int *y1, int *x2, int *y2,int 
 		return;
 	}
 	else if(has_been_cropped){
-		printf("Am intrat in select all cu %d %d %d %d %d %d\n",*width,*height,*x1,*y1,*x2,*y2);
 		*x2 = *px1+*height;
 		*y2 = *py1+*width;
 		*x1 = *px1;
@@ -739,7 +738,7 @@ const int color_image) {
 // This function crops the image.
 void CROP(int *x1, int *y1, int *x2, int *y2, int *width, int *height,
 const int color_image,int* cropped,int* has_been_cropped) {
-printf("Am intrat cu %d %d %d %d %d %d\n",*width,*height,*x1,*y1,*x2,*y2);
+
 	if (color_image == 0) {
 		*height = *x2 - *x1;
 		*width = *y2 - *y1;
@@ -1043,10 +1042,8 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 				}
 
 			} else {
-				printf("Invalid set of coordinates %d %d %d %d\n",*x1,*y1,*x2,*y2);
+				printf("Invalid set of coordinates\n");
 			}
-
-			printf("\n\nAm iesit din SELECT cu %d %d %d %d %d %d\n",*width,*height,*x1,*y1,*x2,*y2);
 			break;
 
 		// FUNCTION: SELECT ALL
@@ -1058,7 +1055,6 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 			else {
 				printf("No image loaded\n");
 			}
-			printf("\n\nAm iesit din SELECT ALL cu %d %d %d %d %d %d----------\n",*width,*height,*x1,*y1,*x2,*y2);
 			break;
 
 		// FUNCTION: ROTATE
@@ -1080,7 +1076,7 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 						}
 
 						// Check if the coordinates form a square image
-						else if ((*x2 - *x1) != (*y2 - *y1))
+						else if ((*x2 - *x1) != (*y2 - *y1) && *whole_map_selected==0)
 							printf("The selection must be square\n");
 
 						 else {
@@ -1107,7 +1103,7 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 						}
 
 						// Check if the coordinates form a square image
-						else if ((*x2 - *x1) != (*y2 - *y1) && (*x2 - *x1) != ((*y2 - *y1)/3)) {
+						else if ((*x2 - *x1) != (*y2 - *y1) && (*x2 - *x1) != ((*y2 - *y1)/3) && *whole_map_selected==0) {
 							printf("The selection must be square\n");
 
 						} else {
@@ -1148,7 +1144,6 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 			else {
 				printf("No image cropped\n");
 			}
-			printf("\n\nAm iesit din CROP cu %d %d %d %d %d %d----------\n",*width,*height,*x1,*y1,*x2,*y2);
 			break;
 
 		// FUNCTION: GREYSCALE
