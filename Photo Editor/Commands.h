@@ -10,10 +10,10 @@ unsigned char **LOAD(const char *, int *, int *, int *, int *, int *, int *,
 int *, int *, char *);
 
 // This function selects a part of the area.
-void SELECT(int *, int *, int *, int *, int *, int *, int *);
+void SELECT(int *, int *, int *, int *, int, int, int *,int);
 
 // This function selects the whole area.
-void SELECT_ALL(int *, int *, int *, int *, int *, int *,int,int*,int*);
+void SELECT_ALL(int *, int *, int *, int *, int *, int *,int,int*,int*,int);
 
 // This functions swaps the values of two variables
 void swap(int *,int*);
