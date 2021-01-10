@@ -252,8 +252,6 @@ SELECT (int *x1, int *y1, int *x2, int *y2, int width, int height,
     }
   else
     {
-      printf ("Selected %d %d %d %d\n", *x1, *y1, *x2, *y2);
-
       // Keep the width and height coordinates in ascending order
       int aux;
       if (*x1 > *x2)
@@ -264,11 +262,12 @@ SELECT (int *x1, int *y1, int *x2, int *y2, int width, int height,
         }
       if (*y1 > *y2)
         {
-          aux = *y2;
+          aux = *y1;
           *y1 = *y2;
           *y2 = aux;
         }
       *correct = 1;
+      printf ("Selected %d %d %d %d\n", *x1, *y1, *x2, *y2);
     }
 }
 
