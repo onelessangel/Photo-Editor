@@ -15,10 +15,13 @@ void SELECT(int *, int *, int *, int *, int *, int *, int *);
 // This function selects the whole area.
 void SELECT_ALL(int *, int *, int *, int *, int *, int *,int,int*,int*);
 
+// This functions swaps the values of two variables
+void swap(int *,int*);
+
 // This function rotates the image or a selection of pixels from the image by a
 // certain angle.
 void ROTATE(const int, unsigned char ***, int *, int *, int *, int *, const int,
-int *, int *,int);
+int *, int *,int,int*,int*,int*,int*);
 
 // This function crops the image.
 void CROP(int *, int *, int *, int *, int *, int *, const int,int*,int*,int*);
