@@ -1064,7 +1064,7 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 
 			// Check image status
 			if (*image != NULL)
-				image_status=UPP;
+				*image_status=UPP;
 			break;
 
 		// FUNCTION: SELECT
