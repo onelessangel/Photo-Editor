@@ -201,22 +201,35 @@ int *y1, int *x2, int *y2, int *color_image, int *my_image_max, char *type) {
 
 
 // This function selects a part of the area.
-void SELECT(int *x1, int *y1, int *x2, int *y2, int *width, int *height,
-int *correct) {
-	
+void SELECT(int *x1, int *y1, int *x2, int *y2, int width, int height,
+int *correct,int color_image) {
+
+		if(color_image == 1)
+			width/=3;
+
 		// Check if the coordinates are valid
 		if (*x1 < 0 || *x2 < 0 || *y1 < 0 || *y2 < 0) {
-			printf("Invalid coordinates\n");
+			printf("Invalid set of coordinates\n");
 			*correct=0;
 			return;
 			}
-		else if (*x1 > *width || *x2 > *width) {
-			printf("Invalid coordinates\n");
+		else if (*x1 > width || *x2 > width) {
+			printf("Invalid set of coordinates\n");
 			*correct=0;
 			return;
 		}
-		else if (*y1 > *height || *y2 > *height) {
-			printf("Invalid coordinates\n");
+		else if(*x1 == *y1 && *y1 == *x2 && *x2 == *y2) {
+			printf("Invalid set of coordinates\n");
+			*correct=0;
+			return;
+		}
+		else if(*y1 == *y2 || *x1==*x2) {
+			printf("Invalid set of coordinates\n");
+			*correct=0;
+			return;
+		}
+		else if (*y1 > height || *y2 > height) {
+			printf("Invalid set of coordinates\n");
 			*correct=0;
 			return;
 		}
@@ -544,7 +557,7 @@ const int color_image, int *px1, int *py1, int*px2,int *py2) {
 				*image = pixel_matrix;
 				*width = (*x2-*x1);
 				*height = (*y2-*y1);
-	
+				
 				*px2-=*px1;
 				*py2-=*py1;
 				swap(py2,px2);
@@ -594,7 +607,7 @@ const int color_image, int *px1, int *py1, int*px2,int *py2) {
 				*image = pixel_matrix;
 				*width = (*x2-*x1)*3;
 				*height = (*y2-*y1)/3;
-
+				
 				*px2-=*px1;
 				*py2-=*py1;
 				swap(py2,px2);
@@ -1051,7 +1064,9 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 			// Get file name
 			sscanf(*input, "%s %s", first_command, file_name);
 			free(first_command);
+
 			// Load the image in a dynamic matrix
+			*image_status = DOWNN;
 			*image = LOAD(file_name, width, height, x1, y1, x2, y2, color_image,
 					my_image_max, type);
 
@@ -1063,8 +1078,11 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 			*whole_map_selected=1;
 
 			// Check image status
-			if (*image != NULL)
+			if(*image == (unsigned char**) ERR)
+				*image_status=DOWNN;
+			else if (*image != NULL)
 				*image_status=UPP;
+	
 			break;
 
 		// FUNCTION: SELECT
@@ -1076,8 +1094,8 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 			
 				if (*image_status == UPP) {
 					*correct=0;
-					SELECT(&replace1, &replace2, &replace3, &replace4, width,
-							height, correct);
+					SELECT(&replace1, &replace2, &replace3, &replace4, *width,
+							*height, correct,*color_image);
 
 					// If valid coordinates are given (coordinates are valid
 					// if they are within the limits of the image)
@@ -1120,7 +1138,7 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 				}
 
 			} else {
-				printf("Invalid set of coordinates\n");
+				printf("Invalid command\n");
 			}
 			break;
 
@@ -1188,10 +1206,8 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 							printf("The selection must be square\n");
 
 						} else {			
-							
 							ROTATE(angle, image, x1, y1, x2, y2,
 									*whole_map_selected, width, height,*color_image,px1,py1,px2,py2);
-							
 						}
 					}
 
@@ -1215,7 +1231,7 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 			
 			}
 			else {
-				printf("No image cropped\n");
+				printf("No image loaded\n");
 			}
 			break;
 
@@ -1273,6 +1289,7 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 				EXIT(image, *height);
 			} else {
 				printf("No image loaded\n");
+				exit(EXIT_SUCCESS);
 			}
 			
 			break;
@@ -1283,3 +1300,4 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 			break;
 	}
 }
+
