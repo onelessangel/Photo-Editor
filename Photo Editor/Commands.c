@@ -540,21 +540,6 @@ const int color_image, int *px1, int *py1, int*px2,int *py2) {
 					}
 				}
 				
-
-				// for(int i=*x1;i<*x2;i++){
-				// 	printf("\n");
-				// 	for(int j=*y1;j<*y2;j++)
-				// 		printf("%hhu ",(*image)[i][j]);
-				// }	
-				
-				// printf("\n");
-				// printf("\n");
-				// for(int i=0;i<(*y2-*y1);i++){
-				// 	printf("\n");
-				// 	for(int j=0;j<(*x2-*x1);j++)
-				// 		printf("%hhu ",pixel_matrix[i][j]);
-				// }		
-				
 				// Save and change coordinates accordingly
 				*image = pixel_matrix;
 				*width = (*x2-*x1);
@@ -604,14 +589,6 @@ const int color_image, int *px1, int *py1, int*px2,int *py2) {
 					}
 					keep_pos += 3;
 				}
-				// printf("\n");
-				// printf("\n");
-				// for(int i=0;i<(*y2-*y1)/3;i++){
-				//  	printf("\n");
-				//  	for(int j=0;j<(*x2-*x1)*3;j++)
-				//  		printf("%hhu ",pixel_matrix[i][j]);
-				//  }
-				//exit(1);
 
 				// Save and change coordinates accordingly
 				*image = pixel_matrix;
@@ -744,21 +721,6 @@ const int color_image, int *px1, int *py1, int*px2,int *py2) {
 					}
 				}
 				
-
-				// for(int i=*x1;i<*x2;i++){
-				// 	printf("\n");
-				// 	for(int j=*y1;j<*y2;j++)
-				// 		printf("%hhu ",(*image)[i][j]);
-				// }	
-				
-				// printf("\n");
-				// printf("\n");
-				// for(int i=0;i<(*y2-*y1);i++){
-				// 	printf("\n");
-				// 	for(int j=0;j<(*x2-*x1);j++)
-				// 		printf("%hhu ",pixel_matrix[i][j]);
-				// }		
-				
 				// Save and change coordinates accordingly
 				*image = pixel_matrix;
 				*width = (*x2-*x1);
@@ -792,27 +754,38 @@ const int color_image, int *px1, int *py1, int*px2,int *py2) {
 							max_size, sizeof(unsigned char));
 
 				// Copy values in the clone matrix
-				int p = 0, k = 0, keep_pos = 0;
-				for (int i = new_height - 1; i >= 0; i--) {
-					k = keep_pos;
-					p = 0;
-					for (int j = 0; j < new_width; j++) {
-						pixel_matrix[i][j] = (*image)[p][k];
-						k++;
-						if (k == (keep_pos + 3)) {
-							p++;
-							k = keep_pos;
+				int k=0,count=0,new_lim=*py2;
+			
+				for(int i=0;i<new_height;i++) {
+					for(int j=0;j<new_width;j++) {
+						pixel_matrix[i][j]=(*image)[*px1+k][new_lim-3+count];
+						count++;
+						if(count==3) {
+							k++;
+							count=0;
 						}
 					}
-					keep_pos += 3;
+					k=0;
+					count=0;
+					new_lim-=3;
 				}
 
 				// Save and change coordinates accordingly
 				*image = pixel_matrix;
 				*width = new_width;
 				*height = new_height;
-				*x2 = *height;
-				*y2 = *width;
+
+				*px2-=*px1;
+				*py2-=*py1;
+				swap(py2,px2);
+				*px1=0;
+				*py1=0;
+				*py2*=3;
+				*px2/=3;
+				*x1=*px1;
+				*y1=*py1;
+				*x2=*px2;
+				*y2=*py2;
 			}
 		}
 	}
@@ -984,7 +957,7 @@ int x1,int y1,int x2,int y2) {
 				char Px[2] = "P2";
 				fprintf(new_file, "%s\n", Px);
 				fprintf(new_file, "%d %d\n%d\n", width, height, my_image_max);
-				printf("De la linia %d %d la coloana %d %d\n",x1,x2,y1,y2);
+
 				for (int i = x1; i < x2; i++) {
 					for (int j = y1; j < y2; j++)
 						fprintf(new_file, "%hhu ", image[i][j]);
@@ -1055,7 +1028,7 @@ void EXIT(unsigned char ***image, const int height) {
 }
 
 // This functions checks if an valid command has been received
-// and,if true, executes the corresponding function
+// and, if true, executes the corresponding function
 void check_command(int command_value, int *width, int *height,
 int *image_status, int *x1, int *y1, int *x2, int *y2,
 unsigned char ***image, char **input, int *color_image, char *type,
@@ -1091,8 +1064,7 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 
 			// Check image status
 			if (*image != NULL)
-				*image_status = UPP;
-			free(file_name);
+				image_status=UPP;
 			break;
 
 		// FUNCTION: SELECT
@@ -1177,20 +1149,24 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 							
 						// Check for valid angle
 						if (angle != 90 && angle != -90 && angle != 180 &&
-								angle != -180 && angle != 270 && angle != -270) {
+								angle != -180 && angle != 270 && angle != -270
+								&& angle != 360 && angle != -360 && angle != 0) {
 							printf("Unsupported rotation angle\n");
 							
 						}
+
+						else if(angle == 360 || angle == -360 || angle == 0)
+							printf("Rotated %d\n",angle);
 
 						// Check if the coordinates form a square image
 						else if ((*x2 - *x1) != (*y2 - *y1) && *whole_map_selected==0)
 							printf("The selection must be square\n");
 
 						else {
-							printf("Am trimis x1:%d y1:%d x2:%d y2:%d whole:%d width:%d height:%d px1:%d py1:%d px2:%d py2:%d\n",*x1,*y1,*x2,*y2,*whole_map_selected,*width,*height,*px1,*py1,*px2,*py2);
+						
 							ROTATE(angle, image, x1, y1, x2, y2,
 									*whole_map_selected, width, height,*color_image, px1, py1, px2, py2);
-							printf("Am iesit x1:%d y1:%d x2:%d y2:%d whole:%d width:%d height:%d  px1:%d py1:%d px2:%d py2:%d\n",*x1,*y1,*x2,*y2,*whole_map_selected,*width,*height,*px1,*py1,*px2,*py2);
+						
 						}
 					}
 
@@ -1198,19 +1174,24 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 
 						// Check for valid angle
 						if (angle != 90 && angle != -90 && angle != 180 &&
-								angle != -180 && angle != 270 && angle != -270) {
+								angle != -180 && angle != 270 && angle != -270
+								 && angle != 360 && angle != -360 && angle != 0) {
 							printf("Unsupported rotation angle\n");
 						}
+
+						else if(angle == 360 || angle == -360 || angle == 0)
+							printf("Rotated %d\n",angle);
+
 
 						// Check if the coordinates form a square image
 						else if ((*x2 - *x1) != (*y2 - *y1) && (*x2 - *x1) != ((*y2 - *y1)/3) && *whole_map_selected==0) {
 							printf("The selection must be square\n");
 
 						} else {			
-							printf("Am trimis x1:%d y1:%d x2:%d y2:%d whole:%d width:%d height:%d px1:%d py1:%d px2:%d py2:%d\n",*x1,*y1,*x2,*y2,*whole_map_selected,*width,*height,*px1,*py1,*px2,*py2);		
+							
 							ROTATE(angle, image, x1, y1, x2, y2,
 									*whole_map_selected, width, height,*color_image,px1,py1,px2,py2);
-							printf("Am iesit x1:%d y1:%d x2:%d y2:%d whole:%d width:%d height:%d  px1:%d py1:%d px2:%d py2:%d\n",*x1,*y1,*x2,*y2,*whole_map_selected,*width,*height,*px1,*py1,*px2,*py2);
+							
 						}
 					}
 
@@ -1247,7 +1228,8 @@ int* has_been_cropped,int *px1, int *py1, int *px2, int * py2) {
 					GRAYSCALE(x1, y1, x2, y2, image);
 				else
 					printf("Grayscale filter not available\n");
-			} else {
+			} 
+			else {
 				printf("No image loaded\n");
 			}
 			break;
