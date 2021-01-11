@@ -2,6 +2,7 @@
 
 #ifndef __MEMORY_H_
 #define __MEMORY_H_
+#include <stdio.h>
 
 // This function allocates the space necessary for the commands.
 char *user_input(void);
@@ -30,21 +31,10 @@ typedef struct {
 } image_t;
 
 // File status
-enum {
-	FILE_OPEN_ERROR = 4,
-	FILE_CLOSE_ERROR = 5,
-};
+enum { FILE_OPEN_ERROR = 4, FILE_CLOSE_ERROR = 5 };
 
 // Predefined values
-enum {
-	NAME_LENGTH_MAX = 100,
-	FALSE = 0,
-	TRUE = 1,
-	SUCC = 2,
-	ERR = 3,
-	UPP = 1,
-	DOWNN = 0,
-	MAX_COMMAND_SIZE = 100
-};
+enum { NAME_LENGTH_MAX = 100, FALSE = 0, TRUE = 1, SUCC = 2, ERR = 3, UPP = 1,
+DOWNN = 0, MAX_COMMAND_SIZE = 100 };
 
 #endif
