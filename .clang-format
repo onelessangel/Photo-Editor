@@ -9,7 +9,7 @@ BasedOnStyle: WebKit
 AccessModifierOffset: -4
 
 # Variable alignment
-AlignAfterOpenBracket: false
+AlignAfterOpenBracket: AlwaysBreak
 
 # Horizontally align operands
 AlignEscapedNewlines: false
@@ -30,7 +30,7 @@ AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
 
 # Short if statements
-AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortIfStatementsOnASingleLine: false
 
 # Short loops on a single line
 AllowShortLoopsOnASingleLine: false
@@ -52,7 +52,7 @@ BreakBeforeBinaryOperators: None
 BreakBeforeTernaryOperators: false
 
 # Newlines after certaint elements
-BreakBeforeBraces: Stroustrup
+BreakBeforeBraces: Linux
 BraceWrapping:
   AfterClass:      true
   AfterControlStatement: false
@@ -63,7 +63,7 @@ BraceWrapping:
   AfterStruct:     true
   AfterUnion:      true
   BeforeCatch:     true
-  BeforeElse:      true
+  BeforeElse:      false
   IndentBraces:    true
 BreakBeforeBraces: Custom
 
@@ -74,7 +74,7 @@ BreakConstructorInitializersBeforeComma: true
 ContinuationIndentWidth: 4
 
 # Line width
-ColumnLimit: 79
+ColumnLimit: 80
 
 # Pragmas
 CommentPragmas:  '^ IWYU pragma:'
@@ -84,10 +84,10 @@ ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ConstructorInitializerIndentWidth: 4
 
 # List
-Cpp11BracedListStyle: false
+Cpp11BracedListStyle: true
 
 # Indent each case by one level
-IndentCaseLabels: true
+IndentCaseLabels: false
 IndentWidth: 4
 
 # The number of consecutive empty lines
