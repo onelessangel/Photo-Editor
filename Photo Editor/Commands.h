@@ -50,9 +50,6 @@ void check_command(const int, int *, int *, int *, int *, int *, int *, int *,
 				   int *, int *, int *, int *, int *, int *, int *, int *);
 
 // Exit status
-enum {
-	SUCCESS = 0,
-	ERROR = 1,
-};
+enum { SUCCESS = 0, ERROR = 1 };
 
 #endif
