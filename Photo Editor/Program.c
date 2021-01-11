@@ -22,9 +22,9 @@ int main(void)
 	char type = '0';
 
 	// Set COMMAND
-	const char *commands[DEFINED_COMMANDS] = {"LOAD",	"SELECT", "SELECT ALL",
-											  "ROTATE", "CROP",	  "GRAYSCALE",
-											  "SEPIA",	"SAVE",	  "EXIT"};
+	const char *commands[DEFINED_COMMANDS] = {"LOAD", "SELECT", "SELECT ALL",
+						 "ROTATE", "CROP", "GRAYSCALE",
+						 "SEPIA", "SAVE", "EXIT"};
 	char *input = user_input();
 
 		// Receive commands and execute them
