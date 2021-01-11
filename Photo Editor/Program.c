@@ -23,8 +23,8 @@ int main(void)
 
 	// Set COMMAND
 	const char *commands[DEFINED_COMMANDS] = {"LOAD", "SELECT", "SELECT ALL",
-						 "ROTATE", "CROP", "GRAYSCALE",
-						 "SEPIA", "SAVE", "EXIT"};
+						  "ROTATE", "CROP", "GRAYSCALE",
+						  "SEPIA", "SAVE", "EXIT"};
 	char *input = user_input();
 
 		// Receive commands and execute them
@@ -35,11 +35,11 @@ int main(void)
 			int command_value = find_command_value(commands, input);
 
 			// If it exists, execute it.
-			check_command(command_value, &width, &height, &image_status, &x1,
-						  &y1, &x2, &y2, &image, &input, &color_image, &type,
-						  &my_image_max, &whole_map_selected, &correct,
-						  &cropped, &has_been_cropped, &print_x1, &print_y1,
-						  &print_x2, &print_y2);
+			check_command
+			(command_value, &width, &height, &image_status, &x1, &y1, &x2, &y2,
+			&image, &input, &color_image, &type, &my_image_max,
+			&whole_map_selected, &correct, &cropped, &has_been_cropped,
+			&print_x1, &print_y1, &print_x2, &print_y2);
 		}
 
 	// Free memory
