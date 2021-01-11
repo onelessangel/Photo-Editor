@@ -2,7 +2,6 @@
 
 #ifndef __SUPPORT_H_
 #define __SUPPORT_H_
-#include <stdio.h>
 
 // This function loads the image from the file
 // and keeps the width and the height.
