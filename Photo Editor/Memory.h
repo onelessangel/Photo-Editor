@@ -14,15 +14,16 @@ int find_command_value(const char *commands[], char *input);
 
 // This functions allocates the memory for the image pixels
 // and copies the pixels from the file in a matrix shape.
-unsigned char **read_pixels(const int my_image_width, const int my_image_height,
-							FILE *file);
+unsigned char **
+read_pixels(const int my_image_width, const int my_image_height, FILE *file);
 
 // This functions frees the memory from the currently loaded image.
 void free_pixels(const int my_image_height, unsigned char ***pixel_matrix);
 
 // This functions creates a copy of the current selection.
-unsigned char **copy_pixels_selection(const int x1, const int y1, const int x2,
-									  const int y2, unsigned char ***image);
+unsigned char **copy_pixels_selection(
+	const int x1, const int y1, const int x2, const int y2,
+	unsigned char ***image);
 
 // Image properties
 typedef struct {
@@ -34,7 +35,15 @@ typedef struct {
 enum { FILE_OPEN_ERROR = 4, FILE_CLOSE_ERROR = 5 };
 
 // Predefined values
-enum { NAME_LENGTH_MAX = 100, FALSE = 0, TRUE = 1, SUCC = 2, ERR = 3, UPP = 1,
-DOWNN = 0, MAX_COMMAND_SIZE = 100 };
+enum {
+	NAME_LENGTH_MAX = 100,
+	FALSE = 0,
+	TRUE = 1,
+	SUCC = 2,
+	ERR = 3,
+	UPP = 1,
+	DOWNN = 0,
+	MAX_COMMAND_SIZE = 100
+};
 
 #endif
