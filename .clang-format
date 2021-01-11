@@ -1,0 +1,125 @@
+# Chelcea Claudiu
+---
+Language: Cpp
+
+# The base style is WebKit
+BasedOnStyle: WebKit
+
+# Align function arguments after linebreak
+AccessModifierOffset: -4
+
+# Variable alignment
+AlignAfterOpenBracket: false
+
+# Horizontally align operands
+AlignEscapedNewlines: false
+
+# Aligns operands
+AlignOperands: true
+
+# Aligns comments properly
+AlignTrailingComments: true
+
+# Short statements on a single line
+AllowShortBlocksOnASingleLine: false
+
+# Switch cases on a single line
+AllowShortCaseLabelsOnASingleLine: false
+
+# Short function
+AllowShortFunctionsOnASingleLine: None
+
+# Short if statements
+AllowShortIfStatementsOnASingleLine: WithoutElse
+
+# Short loops on a single line
+AllowShortLoopsOnASingleLine: false
+
+# For longer, multiline strings
+AlwaysBreakBeforeMultilineStrings: true
+
+# A function call’s arguments will either be all on the same line or on
+# a new line each
+BinPackArguments: true
+
+# The same thing applies to function definition | declaration
+BinPackParameters: true
+
+# Binary operators
+BreakBeforeBinaryOperators: None
+
+# Ternary operators
+BreakBeforeTernaryOperators: false
+
+# Newlines after certaint elements
+BreakBeforeBraces: Stroustrup
+BraceWrapping:
+  AfterClass:      true
+  AfterControlStatement: false
+  AfterEnum:       false
+  AfterFunction:   true
+  AfterNamespace:  true
+  AfterObjCDeclaration: true
+  AfterStruct:     true
+  AfterUnion:      true
+  BeforeCatch:     true
+  BeforeElse:      true
+  IndentBraces:    true
+BreakBeforeBraces: Custom
+
+# Break constructor initializers before comma
+BreakConstructorInitializersBeforeComma: true
+
+# Line continuation indents
+ContinuationIndentWidth: 4
+
+# Line width
+ColumnLimit: 79
+
+# Pragmas
+CommentPragmas:  '^ IWYU pragma:'
+
+# Constructors
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerIndentWidth: 4
+
+# List
+Cpp11BracedListStyle: false
+
+# Indent each case by one level
+IndentCaseLabels: true
+IndentWidth: 4
+
+# The number of consecutive empty lines
+MaxEmptyLinesToKeep: 1
+
+# Indent if the function name is wrapped after the type
+IndentWrappedFunctionNames: false
+
+# Pointer and reference alignment
+NamespaceIndentation: All
+PointerAlignment: Right
+
+# Sorting the included files
+SortIncludes: false
+
+# Spaces for the assigment operators
+SpaceBeforeAssignmentOperators: true
+
+# Spaces for the control statements
+SpaceBeforeParens: ControlStatements
+
+# Keep empty parantheses to () than ( )
+SpaceInEmptyParentheses: false
+
+# The number of spaces before trailing comments
+SpacesBeforeTrailingComments: 1
+
+# Extra spaces for () and [] parantheses
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+# Spacing options
+Standard: Cpp11
+TabWidth: 4
+UseTab: Always
